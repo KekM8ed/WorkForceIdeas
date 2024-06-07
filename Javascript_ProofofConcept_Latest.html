@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Intro to MapView - Create a 2D map | Sample | ArcGIS Maps SDK for JavaScript 4.29</title>
+  <style>
+    /* Basic styling for html and body to take up full viewport */
+    html, body {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      display: flex;
+    }
+    /* Styling for the map container to take full height and width of the view */
+    #viewDiv {
+      height: 100%;
+      width: 100%;
+      position: relative;
+    }
+    /* Styling for the filter panel */
+    #filterDiv {
+      position: absolute;
+      top: 10px;
+      left: 150px;
+      z-index: 10;
+      background-color: #2b2b2b;
+      padding: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+      color: white;
+      font-family: "Noto Sans", sans-serif;
+      border-radius: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      width: 420px;
+    }
+    /* Styling for labels inside the filter panel */
+    #filterDiv label {
+      margin-right: 10px;
+    }
+    /* Styling for filter groups in the filter panel */
+    .filter-group {
+      margin: 0 10px;
+    }
+    /* Ensures labels in filter groups wrap text appropriately */
+    .filter-group label {
+      display: block;
+      white-space: normal;
+      max-width: 180px;
+    }
+    /* Adds spacing to inputs in filter groups */
+    .filter-group input {
+      margin-right: 5px;
+    }
+    /* Styling for details summary in the filter panel */
+    details summary {
+      cursor: pointer;
+    }
+    details summary::marker {
+      color: white;
+    }
+    /* Styling for scrollable lists in the filter panel */
+    .scrollable-list {
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    .scrollable-list div {
+      padding: 2px 0;
+      display: flex;
+      align-items: center;
+    }
+  </style>
+  <!-- Linking to ArcGIS stylesheet for dark theme -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/dark/main.css" />
+  <!-- Loading ArcGIS JavaScript API -->
+  <script src="https://js.arcgis.com/4.29/"></script>
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/FeatureLayer",
+      "esri/renderers/HeatmapRenderer",
+      "esri/core/reactiveUtils",
+      "esri/widgets/Legend",
+      "esri/widgets/Expand",
+      "esri/widgets/LayerList"
+    ], (Map, MapView, FeatureLayer, HeatmapRenderer, reactiveUtils, Legend, Expand, LayerList) => {
+
+      const clusterLabelThreshold = 1500;
+      const haloColor = "#373837";
+      const color = "#f0f0f0";
+
+      // Configuration for clustering features
+      const clusterConfig = {
+        type: "cluster",
+        popupTemplate: {
+          title: "Cluster summary",
+          content: [
+            {
+              type: "text",
+              text: `
+              This cluster represents <b>{cluster_count}</b> power plants with an average capacity of <b>{cluster_avg_capacity_mw} megawatts</b>.
+              The power plants in this cluster produce a total of <b>{expression/total-mw} megawatts</b> of power.`
+            },
+            {
+              type: "text",
+              text: "Most power plants in this cluster generate power from <b>{cluster_type_fuel1}</b>."
+            }
+          ],
+          fieldInfos: [
+            { fieldName: "cluster_count", format: { places: 0, digitSeparator: true } },
+            { fieldName: "cluster_avg_capacity_mw", format: { places: 2, digitSeparator: true } },
+            { fieldName: "expression/total-mw", format: { places: 0, digitSeparator: true } }
+          ],
+          expressionInfos: [{
+            name: "total-mw",
+            title: "total megawatts",
+            expression: "$feature.cluster_avg_capacity_mw * $feature.cluster_count"
+          }]
+        },
+        clusterRadius: "120px",
+        labelsVisible: true,
+        labelingInfo: [{
+          symbol: {
+            type: "text",
+            haloColor,
+            haloSize: "1px",
+            color,
+            font: {
+              family: "Noto Sans",
+              size: "11px"
+            },
+            xoffset: 0,
+            yoffset: "-15px"
+          },
+          labelPlacement: "center-center",
+          labelExpressionInfo: {
+            expression: "Text($feature.cluster_count, '#,### plants')"
+          },
+          where: `cluster_avg_capacity_mw > ${clusterLabelThreshold}`
+        }, {
+          symbol: {
+            type: "text",
+            haloColor,
+            haloSize: "2px",
+            color,
+            font: {
+              weight: "bold",
+              family: "Noto Sans",
+              size: "18px"
+            },
+            xoffset: 0,
+            yoffset: 0
+          },
+          labelPlacement: "center-center",
+          labelExpressionInfo: {
+            expression: "$feature.cluster_type_fuel1"
+          },
+          where: `cluster_avg_capacity_mw > ${clusterLabelThreshold}`
+        }, {
+          symbol: {
+            type: "text",
+            haloColor,
+            haloSize: "1px",
+            color,
+            font: {
+              weight: "bold",
+              family: "Noto Sans",
+              size: "12px"
+            },
+            xoffset: 0,
+            yoffset: "15px"
+          },
+          labelPlacement: "center-center",
+          labelExpressionInfo: {
+            expression: `
+            var value = $feature.cluster_avg_capacity_mw;
+            var num = Count(Text(Round(value)));
+            Decode(num,
+              4, Text(value / Pow(10, 3), "##.0k"),
+              5, Text(value / Pow(10, 3), "##k"),
+              6, Text(value / Pow(10, 3), "##k"),
+              7, Text(value / Pow(10, 6), "##.0m"),
+              Text(value, "#,###")
+            );`
+          },
+          where: `cluster_avg_capacity_mw > ${clusterLabelThreshold}`
+        }, {
+          symbol: {
+            type: "text",
+            haloColor,
+            haloSize: "1px",
+            color,
+            font: {
+              family: "Noto Sans",
+              size: "11px"
+            },
+            xoffset: 0,
+            yoffset: "-15px"
+          },
+          labelPlacement: "above-right",
+          labelExpressionInfo: {
+            expression: "Text($feature.cluster_count, '#,### plants')"
+          },
+          where: `cluster_avg_capacity_mw <= ${clusterLabelThreshold}`
+        }, {
+          symbol: {
+            type: "text",
+            haloColor,
+            haloSize: "2px",
+            color,
+            font: {
+              weight: "bold",
+              family: "Noto Sans",
+              size: "18px"
+            }
+          },
+          labelPlacement: "above-right",
+          labelExpressionInfo: {
+            expression: "$feature.cluster_type_fuel1"
+          },
+          where: `cluster_avg_capacity_mw <= ${clusterLabelThreshold}`
+        }, {
+          symbol: {
+            type: "text",
+            haloColor,
+            haloSize: "1px",
+            color,
+            font: {
+              weight: "bold",
+              family: "Noto Sans",
+              size: "12px"
+            },
+            xoffset: 0,
+            yoffset: 0
+          },
+          labelPlacement: "center-center",
+          labelExpressionInfo: {
+            expression: `
+            var value = $feature.cluster_avg_capacity_mw;
+            var num = Count(Text(Round(value)));
+            Decode(num,
+              4, Text(value / Pow(10, 3), "##.0k"),
+              5, Text(value / Pow(10, 3), "##k"),
+              6, Text(value / Pow(10, 3), "##k"),
+              7, Text(value / Pow(10, 6), "##.0m"),
+              Text(value, "#,###")
+            );`
+          },
+          where: `cluster_avg_capacity_mw <= ${clusterLabelThreshold}`
+        }]
+      };
+
+      // Renderer for the heatmap layer
+      const heatmapRenderer = new HeatmapRenderer({
+        colorStops: [
+          { ratio: 0, color: "rgba(255, 255, 255, 0)" },
+          { ratio: 0.3, color: "rgba(51, 255, 243, 0.4)" },
+          { ratio: 0.5, color: "rgba(255, 182, 193, 0.4)" },
+          { ratio: 0.7, color: "rgba(255, 160, 122, 0.4)" },
+          { ratio: 0.9, color: "rgba(250, 235, 215, 0.4)" }
+        ],
+        maxPixelIntensity: 50,
+        minPixelIntensity: 0,
+        legendOptions: {
+          title: "Global Power Plant Heatmap"
+        }
+      });
+
+      // Feature layer with clustering configuration
+      const clusterLayer = new FeatureLayer({
+        portalItem: {
+          id: "eb54b44c65b846cca12914b87b315169"
+        },
+        featureReduction: clusterConfig,
+        popupEnabled: true,
+        title: "Global Power Plant Points",
+        labelingInfo: [{
+          symbol: {
+            type: "text",
+            haloColor,
+            haloSize: "1px",
+            color,
+            font: { family: "Noto Sans", size: "11px" },
+            xoffset: 0,
+            yoffset: "-15px"
+          },
+          labelPlacement: "center-center",
+          labelExpressionInfo: { expression: "$feature.name" },
+          where: `capacity_mw > ${clusterLabelThreshold}`
+        }, {
+          symbol: {
+            type: "text",
+            haloColor,
+            haloSize: "2px",
+            color,
+            font: { weight: "bold", family: "Noto Sans", size: "18px" },
+            xoffset: 0,
+            yoffset: 0
+          },
+          labelPlacement: "center-center",
+          labelExpressionInfo: { expression: "$feature.fuel1" },
+          where: `capacity_mw > ${clusterLabelThreshold}`
+        }, {
+          symbol: {
+            type: "text",
+            haloColor,
+            haloSize: "1px",
+            color,
+            font: { weight: "bold", family: "Noto Sans", size: "12px" },
+            xoffset: 0,
+            yoffset: "15px"
+          },
+          labelPlacement: "center-center",
+          labelExpressionInfo: {
+            expression: `
+            var value = $feature.capacity_mw;
+            var num = Count(Text(Round(value)));
+            Decode(num,
+              4, Text(value / Pow(10, 3), "##.0k"),
+              5, Text(value / Pow(10, 3), "##k"),
+              6, Text(value / Pow(10, 3), "##k"),
+              7, Text(value / Pow(10, 6), "##.0m"),
+              Text(value, "#,###")
+            );`
+          },
+          where: `capacity_mw > ${clusterLabelThreshold}`
+        }, {
+          symbol: {
+            type: "text",
+            haloColor,
+            haloSize: "1px",
+            color,
+            font: { family: "Noto Sans", size: "11px" },
+            xoffset: 0,
+            yoffset: "-15px"
+          },
+          labelPlacement: "above-right",
+          labelExpressionInfo: { expression: "$feature.name" },
+          where: `capacity_mw <= ${clusterLabelThreshold}`
+        }, {
+          symbol: {
+            type: "text",
+            haloColor,
+            haloSize: "2px",
+            color,
+            font: { weight: "bold", family: "Noto Sans", size: "18px" }
+          },
+          labelPlacement: "above-right",
+          labelExpressionInfo: { expression: "$feature.fuel1" },
+          where: `capacity_mw <= ${clusterLabelThreshold}`
+        }, {
+          symbol: {
+            type: "text",
+            haloColor,
+            haloSize: "1px",
+            color,
+            font: { weight: "bold", family: "Noto Sans", size: "12px" },
+            xoffset: 0,
+            yoffset: 0
+          },
+          labelPlacement: "center-center",
+          labelExpressionInfo: {
+            expression: `
+            var value = $feature.capacity_mw;
+            var num = Count(Text(Round(value)));
+            Decode(num,
+              4, Text(value / Pow(10, 3), "##.0k"),
+              5, Text(value / Pow(10, 3), "##k"),
+              6, Text(value / Pow(10, 3), "##k"),
+              7, Text(value / Pow(10, 6), "##.0m"),
+              Text(value, "#,###")
+            );`
+          },
+          where: `capacity_mw <= ${clusterLabelThreshold}`
+        }]
+      });
+
+      // Adjusts cluster layer renderer when the layer is ready
+      clusterLayer.when(() => {
+        const renderer = clusterLayer.renderer.clone();
+        renderer.visualVariables = [{
+          type: "size",
+          field: "capacity_mw",
+          legendOptions: {
+            title: "Capacity (MW)"
+          },
+          minSize: "24px",
+          maxSize: "100px",
+          minDataValue: 1,
+          maxDataValue: 5000
+        }];
+        clusterLayer.renderer = renderer;
+      });
+
+      // Heatmap layer for displaying power plants as a heatmap
+      const heatmapLayer = new FeatureLayer({
+        portalItem: {
+          id: "eb54b44c65b846cca12914b87b315169"
+        },
+        renderer: heatmapRenderer,
+        title: "Global Power Plant Heatmap"
+      });
+
+      // Map object containing the layers
+      const map = new Map({
+        basemap: "streets-night-vector",
+        layers: [heatmapLayer, clusterLayer]
+      });
+
+      // MapView for displaying the map in 2D
+      const view = new MapView({
+        container: "viewDiv",
+        map: map,
+        zoom: 4.8,
+        center: [00, 54]
+      });
+
+      // Actions to perform when the view is ready
+      view.when(() => {
+        // Watches the view scale and toggles visibility of layers based on the scale
+        reactiveUtils.watch(
+          () => view.scale,
+          (scale) => {
+            heatmapLayer.visible = scale > 60000;
+            clusterLayer.featureReduction = scale > 60000 ? clusterConfig : null;
+          }
+        );
+
+        // Legend widget
+        const legend = new Legend({
+          view: view
+        });
+
+        // Expand widget for the legend
+        const legendExpand = new Expand({
+          view: view,
+          content: legend,
+          expandIconClass: "esri-icon-legend",
+          expanded: true
+        });
+
+        // Adds legend expand widget to the view
+        view.ui.add(legendExpand, "top-right");
+
+        // LayerList widget
+        const layerList = new LayerList({
+          view: view
+        });
+
+        // Expand widget for the layer list
+        const layerListExpand = new Expand({
+          view: view,
+          content: layerList,
+          expandIconClass: "esri-icon-layer-list",
+          expanded: false
+        });
+
+        // Adds layer list expand widget to the view
+        view.ui.add(layerListExpand, "top-left");
+
+        // Creates filter div element
+        const filterDiv = document.createElement("div");
+        filterDiv.id = "filterDiv";
+        filterDiv.innerHTML = `
+          <details class="filter-group">
+            <summary>Filter by Fuel Type</summary>
+            <div>
+              <label>
+                <input type="checkbox" id="fuel-all" value="all">
+                All
+              </label>
+            </div>
+            <div id="fuelFilter" class="scrollable-list"></div>
+          </details>
+          <details class="filter-group">
+            <summary>Filter by Country</summary>
+            <div>
+              <label>
+                <input type="checkbox" id="country-all" value="all">
+                All
+              </label>
+            </div>
+            <div id="countryFilter" class="scrollable-list"></div>
+          </details>
+        `;
+        // Adds filter div to the view
+        view.ui.add(filterDiv, "manual");
+
+        // Fetches distinct fuel types and populates the filter
+        clusterLayer.when(() => {
+          const fuelQuery = clusterLayer.createQuery();
+          fuelQuery.returnDistinctValues = true;
+          fuelQuery.outFields = ["fuel1"];
+          clusterLayer.queryFeatures(fuelQuery).then((result) => {
+            const fuelSet = new Set();
+            result.features.forEach((feature) => {
+              fuelSet.add(feature.attributes.fuel1);
+            });
+
+            const fuelFilter = document.getElementById("fuelFilter");
+            fuelSet.forEach((value) => {
+              const div = document.createElement("div");
+              const checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.value = value;
+              checkbox.id = `fuel-${value}`;
+              const label = document.createElement("label");
+              label.htmlFor = `fuel-${value}`;
+              label.textContent = value;
+              div.appendChild(checkbox);
+              div.appendChild(label);
+              fuelFilter.appendChild(div);
+            });
+
+            // Adding Geothermal manually in case it's not present in the dataset
+            if (!fuelSet.has("Geothermal")) {
+              const geoDiv = document.createElement("div");
+              const geoCheckbox = document.createElement("input");
+              geoCheckbox.type = "checkbox";
+              geoCheckbox.value = "Geothermal";
+              geoCheckbox.id = "fuel-Geothermal";
+              const geoLabel = document.createElement("label");
+              geoLabel.htmlFor = "fuel-Geothermal";
+              geoLabel.textContent = "Geothermal";
+              geoDiv.appendChild(geoCheckbox);
+              geoDiv.appendChild(geoLabel);
+              fuelFilter.appendChild(geoDiv);
+            }
+          });
+
+          // Fetches distinct countries and populates the filter
+          const countryQuery = clusterLayer.createQuery();
+          countryQuery.returnDistinctValues = true;
+          countryQuery.outFields = ["country_long"];
+          countryQuery.orderByFields = ["country_long"];
+          countryQuery.returnGeometry = false;
+          clusterLayer.queryFeatures(countryQuery).then((result) => {
+            const countrySet = new Set();
+            result.features.forEach((feature) => {
+              countrySet.add(feature.attributes.country_long);
+            });
+
+            const countryFilter = document.getElementById("countryFilter");
+            countrySet.forEach((value) => {
+              const div = document.createElement("div");
+              const checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.value = value;
+              checkbox.id = `country-${value}`;
+              const label = document.createElement("label");
+              label.htmlFor = `country-${value}`;
+              label.textContent = value;
+              div.appendChild(checkbox);
+              div.appendChild(label);
+              countryFilter.appendChild(div);
+            });
+          });
+        });
+
+        // Adds event listeners to update filters
+        document.getElementById("fuelFilter").addEventListener("change", updateFilter);
+        document.getElementById("countryFilter").addEventListener("change", updateFilter);
+
+        // Adds event listeners for the "All" checkboxes
+        document.getElementById("fuel-all").addEventListener("change", (e) => toggleAll(e, "fuel"));
+        document.getElementById("country-all").addEventListener("change", (e) => toggleAll(e, "country"));
+
+        // Function to update the filter based on selected options
+        function updateFilter() {
+          const selectedFuels = Array.from(document.querySelectorAll("#fuelFilter input:checked")).map(input => input.value);
+          const selectedCountries = Array.from(document.querySelectorAll("#countryFilter input:checked")).map(input => input.value);
+
+          let fuelFilter = "";
+          if (selectedFuels.length) {
+            fuelFilter = `fuel1 IN ('${selectedFuels.join("','")}')`;
+          }
+
+          let countryFilter = "";
+          if (selectedCountries.length) {
+            countryFilter = `country_long IN ('${selectedCountries.join("','")}')`;
+          }
+
+          let filter = [fuelFilter, countryFilter].filter(Boolean).join(" AND ");
+          clusterLayer.definitionExpression = filter;
+          heatmapLayer.definitionExpression = filter;
+        }
+
+        // Function to toggle all checkboxes in a filter group
+        function toggleAll(event, type) {
+          const checkboxes = document.querySelectorAll(`#${type}Filter input`);
+          checkboxes.forEach(checkbox => checkbox.checked = event.target.checked);
+          updateFilter();
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <!-- Div container for the map view -->
+  <div id="viewDiv"></div>
+</body>
+</html>
