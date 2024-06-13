@@ -489,6 +489,7 @@
         });
       });
 
+      // Function to update statistics based on current view extent
       function updateStats(layerView) {
         const query = layerView.createQuery();
         query.geometry = view.extent;
@@ -502,6 +503,7 @@
         });
       }
 
+      // Function to create statistical definitions for queries
       function createStatDefinitions() {
         const statDefinitions = [];
         const fuels = ["Hydro", "Gas", "Other", "Oil", "Wind", "Nuclear", "Coal", "Solar", "Waste", "Biomass", "Geothermal"];
@@ -536,6 +538,7 @@
         return statDefinitions;
       }
 
+      // Function to render statistics in the side panel and create charts
       function renderStats(stats) {
         console.log("Stats object:", stats);
 
