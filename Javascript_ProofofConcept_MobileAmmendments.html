@@ -49,9 +49,25 @@
       border-radius: 5px;
       display: flex;
       flex-direction: column; /* Changed for mobile */
-      width: 90%; /* Reduce width for mobile */
+      width: 80%; /* Reduce width for mobile */
       max-height: 50%; /* Limit height on mobile */
       overflow-y: auto; /* Allow scrolling */
+    }
+
+    /* Media query for portrait orientation on mobile devices */
+    @media (max-width: 600px) and (orientation: portrait) {
+      #filterDiv {
+        width: 90%;
+        top: 50px; /* Ensure it doesn't overlap with other UI elements */
+      }
+    }
+
+    /* Media query for landscape orientation on mobile devices */
+    @media (max-width: 600px) and (orientation: landscape) {
+      #filterDiv {
+        width: 60%;
+        top: 10px; /* Keep it higher to avoid overlap with the statistics panel */
+      }
     }
 
     /* Media query for larger screens */
