@@ -32,6 +32,7 @@
       padding: 10px; /* Adjusted padding for mobile */
       box-sizing: border-box;
       background-color: #fff; /* Ensure readability */
+      z-index: 1; /* Set z-index lower than legend */
     }
 
     /* Styles for the filter container */
@@ -91,6 +92,7 @@
       .esri-expand--left .esri-expand__content {
         left: auto;
         right: 0;
+        z-index: 11; /* Ensure legend content appears above panel */
       }
     }
 
