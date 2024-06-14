@@ -67,51 +67,25 @@
       html, body {
         flex-direction: row;
       }
-    
+
       #viewDiv {
         height: 100%;
         width: 60%; /* Adjust width for landscape */
         flex: none; /* Remove flex growth */
       }
-    
+
       #panel {
         height: 100%;
         width: 40%; /* Adjust width for landscape */
         padding: 10px; /* Adjust padding */
         position: relative;
       }
-    
+
       #filterDiv {
         width: 45%;
         top: 10px; /* Keep it higher to avoid overlap with the statistics panel */
-        left: 10px; /* Align to the left */
+        left: 60px; /* Align to the left */
         transform: none; /* Reset transform */
-      }
-    
-      .esri-expand.esri-expand-left {
-        right: unset;
-        left: 10px; /* Adjust left position */
-        top: 10px; /* Ensure it doesn't overlap with other UI elements */
-      }
-    
-      .esri-expand-content .esri-legend {
-        max-width: calc(100% - 20px); /* Ensure legend content stays within the boundaries */
-        overflow: auto; /* Add scrolling if content overflows */
-        padding: 10px; /* Add padding for better appearance */
-        box-sizing: border-box; /* Ensure padding is included in width calculation */
-      }
-    }
-    
-    /* Additional styling for mobile responsiveness */
-    @media (max-width: 600px) {
-      .esri-expand.esri-expand-left {
-        right: 10px; /* Adjust the right padding on smaller screens */
-      }
-    }
-    
-    @media (max-width: 800px) {
-      .esri-expand.esri-expand-left {
-        right: 10px; /* Adjust the right padding on smaller screens */
       }
 
     }
@@ -195,35 +169,6 @@
       width: 100% !important; /* Adjust width to 100% */
       height: auto !important;
       margin: 0 auto; /* Center align the chart */
-    }
-
-    /* Constrain the expanded legend within the map view's boundaries */
-    .esri-expand.esri-expand-left {
-      max-width: 100%;
-      right: 10px; /* Add some padding from the right */
-      top: 10px; /* Add some padding from the top */
-      left: unset; /* Ensure left is not set */
-    }
-
-    /* Style the content of the expanded legend */
-    .esri-expand-content .esri-legend {
-      max-width: calc(100% - 20px); /* Ensure legend content stays within the boundaries */
-      overflow: auto; /* Add scrolling if content overflows */
-      padding: 10px; /* Add padding for better appearance */
-      box-sizing: border-box; /* Ensure padding is included in width calculation */
-    }
-
-    /* Additional styling for mobile responsiveness */
-    @media (max-width: 600px) {
-      .esri-expand.esri-expand-left {
-        right: 10px; /* Adjust the right padding on smaller screens */
-      }
-    }
-
-    @media (max-width: 800px) {
-      .esri-expand.esri-expand-left {
-        right: 10px; /* Adjust the right padding on smaller screens */
-      }
     }
   </style>
   <!-- ArcGIS API for JavaScript styles -->
