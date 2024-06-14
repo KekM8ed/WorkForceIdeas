@@ -38,7 +38,8 @@
     #filterDiv {
       position: absolute;
       top: 10px;
-      left: 10px; /* Adjusted for mobile */
+      left: 50%;
+      transform: translateX(-50%); /* Center on mobile */
       z-index: 10;
       background-color: #2b2b2b;
       padding: 10px;
@@ -48,7 +49,7 @@
       border-radius: 5px;
       display: flex;
       flex-direction: column; /* Changed for mobile */
-      width: calc(100% - 20px); /* Adjust width for mobile */
+      width: 90%; /* Reduce width for mobile */
       max-height: 50%; /* Limit height on mobile */
       overflow-y: auto; /* Allow scrolling */
     }
@@ -76,6 +77,7 @@
         flex-direction: row;
         width: 420px;
         left: 150px;
+        transform: none; /* Reset transform */
         max-height: none; /* Remove height limit on larger screens */
       }
     }
