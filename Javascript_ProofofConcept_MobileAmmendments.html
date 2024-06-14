@@ -6,177 +6,177 @@
   <title>Workforce Proof of Concept - MapView with Bar Chart</title>
   <style>
     /* Styles to ensure the HTML and body take up the full viewport */
-html, body {
-  padding: 0;
-  margin: 0;
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column; /* Changed for mobile */
-}
+    html, body {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column; /* Changed for mobile */
+    }
 
-/* Styles for the map view container */
-#viewDiv {
-  position: relative; /* Changed for mobile */
-  height: 60%; /* Adjust height for mobile */
-  width: 100%;
-  flex: 1; /* Allow map to take available space */
-}
+    /* Styles for the map view container */
+    #viewDiv {
+      position: relative; /* Changed for mobile */
+      height: 60%; /* Adjust height for mobile */
+      width: 100%;
+      flex: 1; /* Allow map to take available space */
+    }
 
-/* Styles for the statistics panel */
-#panel {
-  position: relative; /* Changed for mobile */
-  height: 40%; /* Adjust height for mobile */
-  width: 100%;
-  overflow-y: auto;
-  padding: 10px; /* Adjusted padding for mobile */
-  box-sizing: border-box;
-  background-color: #fff; /* Ensure readability */
-}
+    /* Styles for the statistics panel */
+    #panel {
+      position: relative; /* Changed for mobile */
+      height: 40%; /* Adjust height for mobile */
+      width: 100%;
+      overflow-y: auto;
+      padding: 10px; /* Adjusted padding for mobile */
+      box-sizing: border-box;
+      background-color: #fff; /* Ensure readability */
+    }
 
-/* Styles for the filter container */
-#filterDiv {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%); /* Center on mobile */
-  z-index: 10;
-  background-color: #2b2b2b;
-  padding: 10px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.5);
-  color: white;
-  font-family: "Noto Sans", sans-serif;
-  border-radius: 5px;
-  display: flex;
-  flex-direction: column; /* Changed for mobile */
-  width: 60%; /* Reduce width for mobile */
-  max-height: 50%; /* Limit height on mobile */
-  overflow-y: auto; /* Allow scrolling */
-}
+    /* Styles for the filter container */
+    #filterDiv {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%); /* Center on mobile */
+      z-index: 10;
+      background-color: #2b2b2b;
+      padding: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+      color: white;
+      font-family: "Noto Sans", sans-serif;
+      border-radius: 5px;
+      display: flex;
+      flex-direction: column; /* Changed for mobile */
+      width: 60%; /* Reduce width for mobile */
+      max-height: 50%; /* Limit height on mobile */
+      overflow-y: auto; /* Allow scrolling */
+    }
 
-/* Media query for portrait orientation on mobile devices */
-@media (max-width: 600px) and (orientation: portrait) {
-  #filterDiv {
-    width: 60%;
-    top: 10px; /* Ensure it doesn't overlap with other UI elements */
-  }
-}
+    /* Media query for portrait orientation on mobile devices */
+    @media (max-width: 600px) and (orientation: portrait) {
+      #filterDiv {
+        width: 60%;
+        top: 10px; /* Ensure it doesn't overlap with other UI elements */
+      }
+    }
 
-/* Media query for landscape orientation on mobile devices */
-@media (max-width: 800px) and (orientation: landscape) {
-  html, body {
-    flex-direction: row;
-  }
+    /* Media query for landscape orientation on mobile devices */
+    @media (max-width: 800px) and (orientation: landscape) {
+      html, body {
+        flex-direction: row;
+      }
 
-  #viewDiv {
-    height: 100%;
-    width: 60%; /* Adjust width for landscape */
-    flex: none; /* Remove flex growth */
-  }
+      #viewDiv {
+        height: 100%;
+        width: 60%; /* Adjust width for landscape */
+        flex: none; /* Remove flex growth */
+      }
 
-  #panel {
-    height: 100%;
-    width: 40%; /* Adjust width for landscape */
-    padding: 10px; /* Adjust padding */
-    position: relative;
-  }
+      #panel {
+        height: 100%;
+        width: 40%; /* Adjust width for landscape */
+        padding: 10px; /* Adjust padding */
+        position: relative;
+      }
 
-  #filterDiv {
-    width: 45%;
-    top: 10px; /* Keep it higher to avoid overlap with the statistics panel */
-    left: 60px; /* Align to the left */
-    transform: none; /* Reset transform */
-  }
+      #filterDiv {
+        width: 45%;
+        top: 10px; /* Keep it higher to avoid overlap with the statistics panel */
+        left: 60px; /* Align to the left */
+        transform: none; /* Reset transform */
+      }
 
-  .esri-expand--left .esri-expand__content {
-    left: 0;
-    right: auto;
-    max-width: 60vw; /* Ensure legend content does not exceed 60% of viewport width */
-    width: 100%; /* Ensure legend content takes full available width */
-    box-sizing: border-box;
-  }
-}
+      .esri-expand--left .esri-expand__content {
+        left: 0;
+        right: auto;
+        max-width: 60vw; /* Ensure legend content does not exceed 60% of viewport width */
+        width: 100%; /* Ensure legend content takes full available width */
+        box-sizing: border-box;
+      }
+    }
 
-/* Media query for larger screens */
-@media (min-width: 800px) {
-  html, body {
-    flex-direction: row;
-  }
+    /* Media query for larger screens */
+    @media (min-width: 800px) {
+      html, body {
+        flex-direction: row;
+      }
 
-  #viewDiv {
-    position: relative;
-    height: 100%;
-    width: 60%; /* Adjust width for larger screens */
-  }
+      #viewDiv {
+        position: relative;
+        height: 100%;
+        width: 60%; /* Adjust width for larger screens */
+      }
 
-  #panel {
-    position: relative;
-    height: 100%;
-    width: 40%; /* Adjust width for larger screens */
-    padding: 20px;
-  }
+      #panel {
+        position: relative;
+        height: 100%;
+        width: 40%; /* Adjust width for larger screens */
+        padding: 20px;
+      }
 
-  #filterDiv {
-    flex-direction: row;
-    width: 420px;
-    left: 150px;
-    transform: none; /* Reset transform */
-    max-height: none; /* Remove height limit on larger screens */
-  }
-}
+      #filterDiv {
+        flex-direction: row;
+        width: 420px;
+        left: 150px;
+        transform: none; /* Reset transform */
+        max-height: none; /* Remove height limit on larger screens */
+      }
+    }
 
-/* Styles for filter labels */
-#filterDiv label {
-  margin-right: 10px;
-}
+    /* Styles for filter labels */
+    #filterDiv label {
+      margin-right: 10px;
+    }
 
-/* Styles for filter groups */
-.filter-group {
-  margin: 0 10px;
-}
-.filter-group label {
-  display: block;
-  white-space: normal;
-  max-width: 180px;
-}
-.filter-group input {
-  margin-right: 5px;
-}
+    /* Styles for filter groups */
+    .filter-group {
+      margin: 0 10px;
+    }
+    .filter-group label {
+      display: block;
+      white-space: normal;
+      max-width: 180px;
+    }
+    .filter-group input {
+      margin-right: 5px;
+    }
 
-/* Styles for details summary elements */
-details summary {
-  cursor: pointer;
-}
+    /* Styles for details summary elements */
+    details summary {
+      cursor: pointer;
+    }
 
-/* Styles for details summary marker */
-details summary::marker {
-  color: white;
-}
+    /* Styles for details summary marker */
+    details summary::marker {
+      color: white;
+    }
 
-/* Styles for scrollable lists */
-.scrollable-list {
-  max-height: 200px;
-  overflow-y: auto;
-  padding-right: 5px;
-}
-.scrollable-list div {
-  padding: 2px 0;
-  display: flex;
-  align-items: center;
-}
+    /* Styles for scrollable lists */
+    .scrollable-list {
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    .scrollable-list div {
+      padding: 2px 0;
+      display: flex;
+      align-items: center;
+    }
 
-/* Styles for map canvas */
-#viewDiv canvas {
-  width: 100% !important;
-  height: auto !important;
-}
+    /* Styles for map canvas */
+    #viewDiv canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
 
-/* Styles for chart canvas */
-#panel canvas {
-  width: 100% !important; /* Adjust width to 100% */
-  height: auto !important;
-  margin: 0 auto; /* Center align the chart */
-}
+    /* Styles for chart canvas */
+    #panel canvas {
+      width: 100% !important; /* Adjust width to 100% */
+      height: auto !important;
+      margin: 0 auto; /* Center align the chart */
+    }
   </style>
   <!-- ArcGIS API for JavaScript styles -->
   <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/dark/main.css" />
