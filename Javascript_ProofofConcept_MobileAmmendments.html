@@ -87,6 +87,11 @@
         left: 60px; /* Align to the left */
         transform: none; /* Reset transform */
       }
+
+      .esri-expand--left .esri-expand__content {
+        left: auto;
+        right: 0;
+      }
     }
 
     /* Media query for larger screens */
@@ -628,7 +633,7 @@
         const fuelStats = fuels.map(fuel => {
           const value = Math.round(stats[`Total_${fuel}MW`]);
           return { fuel, value };
-        }).sort((a, b) => b.value - a.value).slice(0, 15);
+        }). sort((a, b) => b.value - a.value).slice(0, 15);
 
         const countryStats = countries.map(country => {
           const value = Math.round(stats[`Total_${country.replace(/ /g, '_')}`]);
@@ -906,7 +911,10 @@
         view: view,
         content: legend,
         expandIconClass: "esri-icon-legend",
-        expanded: true
+        expanded: true,
+        expandTooltip: "Legend",
+        group: "top-right",
+        className: "esri-expand--left" /* Add custom class */
       });
 
       view.ui.add(legendExpand, "top-right");
@@ -921,7 +929,9 @@
         view: view,
         content: layerList,
         expandIconClass: "esri-icon-layer-list",
-        expanded: false
+        expanded: false,
+        expandTooltip: "Layer List",
+        group: "top-left"
       });
 
       view.ui.add(layerListExpand, "top-left");
