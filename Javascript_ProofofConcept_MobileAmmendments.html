@@ -173,15 +173,15 @@
 
     /* Constrain the expanded legend within the map view's boundaries */
     .esri-expand.esri-expand-left {
-      max-width: 100%;
+      max-width: calc(100% - 20px); /* Ensure it stays within the map view */
       right: 10px; /* Add some padding from the right */
       top: 10px; /* Add some padding from the top */
       left: unset; /* Ensure left is not set */
     }
 
     /* Style the content of the expanded legend */
-    .esri-expand-content .esri-legend {
-      max-width: calc(100% - 20px); /* Ensure legend content stays within the boundaries */
+    .esri-expand-content {
+      max-width: 100%; /* Ensure legend content stays within the boundaries */
       overflow: auto; /* Add scrolling if content overflows */
       padding: 10px; /* Add padding for better appearance */
       box-sizing: border-box; /* Ensure padding is included in width calculation */
@@ -938,7 +938,6 @@
         expandIconClass: "esri-icon-legend",
         expanded: true,
         expandTooltip: "Legend",
-        group: "top-right",
         className: "esri-expand-left" /* Add custom class */
       });
 
