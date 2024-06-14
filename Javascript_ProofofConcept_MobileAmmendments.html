@@ -910,10 +910,33 @@
         expanded: true,
         expandTooltip: "Legend",
         group: "top-right",
-        className: "esri-expand-left" /* Add custom class */
+        className: "esri-expand-left",
+        id: "legendExpand" // Added ID for easier reference
       });
 
       view.ui.add(legendExpand, "top-right");
+
+      // Function to update the legend position based on the screen size and orientation
+      function updateLegendPosition() {
+        const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+        const isMobile = window.matchMedia("(max-width: 800px)").matches;
+        const legendExpand = view.ui.find("legendExpand");
+
+        if (isLandscape && isMobile) {
+          view.ui.move(legendExpand, "top-left"); // Move to top-left in landscape mobile view
+          legendExpand.expandTooltip = "Legend (under Layer List)";
+        } else {
+          view.ui.move(legendExpand, "top-right"); // Default position
+          legendExpand.expandTooltip = "Legend";
+        }
+      }
+
+      // Initial call to set the correct position on load
+      updateLegendPosition();
+
+      // Update position on orientation change and resize
+      window.addEventListener("resize", updateLegendPosition);
+      window.addEventListener("orientationchange", updateLegendPosition);
 
       // Layer list widget
       const layerList = new LayerList({
