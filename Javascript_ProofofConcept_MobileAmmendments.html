@@ -49,6 +49,8 @@
       display: flex;
       flex-direction: column; /* Changed for mobile */
       width: calc(100% - 20px); /* Adjust width for mobile */
+      max-height: 50%; /* Limit height on mobile */
+      overflow-y: auto; /* Allow scrolling */
     }
 
     /* Media query for larger screens */
@@ -74,6 +76,7 @@
         flex-direction: row;
         width: 420px;
         left: 150px;
+        max-height: none; /* Remove height limit on larger screens */
       }
     }
 
