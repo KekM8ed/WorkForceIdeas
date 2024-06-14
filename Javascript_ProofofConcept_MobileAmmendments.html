@@ -64,6 +64,22 @@
 
     /* Media query for landscape orientation on mobile devices */
     @media (max-width: 600px) and (orientation: landscape) {
+      html, body {
+        flex-direction: row;
+      }
+
+      #viewDiv {
+        height: 100%;
+        width: 60%; /* Adjust width for landscape */
+        flex: none; /* Remove flex growth */
+      }
+
+      #panel {
+        height: 100%;
+        width: 40%; /* Adjust width for landscape */
+        padding: 10px; /* Adjust padding */
+      }
+
       #filterDiv {
         width: 45%;
         top: 10px; /* Keep it higher to avoid overlap with the statistics panel */
