@@ -32,7 +32,6 @@ html, body {
   padding: 10px; /* Adjusted padding for mobile */
   box-sizing: border-box;
   background-color: #fff; /* Ensure readability */
-  z-index: 1; /* Ensure panel is below legend */
 }
 
 /* Styles for the filter container */
@@ -80,7 +79,6 @@ html, body {
     width: 40%; /* Adjust width for landscape */
     padding: 10px; /* Adjust padding */
     position: relative;
-    z-index: 1; /* Ensure panel is below legend */
   }
 
   #filterDiv {
@@ -93,7 +91,9 @@ html, body {
   .esri-expand--left .esri-expand__content {
     left: 0;
     right: auto;
-    z-index: 11; /* Ensure legend content appears above panel */
+    max-width: 60vw; /* Ensure legend content does not exceed 60% of viewport width */
+    width: 100%; /* Ensure legend content takes full available width */
+    box-sizing: border-box;
   }
 }
 
