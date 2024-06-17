@@ -496,13 +496,13 @@
 
       // Watch for scale changes and update visibility
       view.when(async () => {
-        reactiveUtils.watch(
-          () => view.scale,
-          (scale) => {
-            heatmapLayer.visible = scale > 60000;
-            clusterLayer.featureReduction = scale > 60000 ? clusterConfig : null;
-          }
-        );
+        // reactiveUtils.watch(
+        //   () => view.scale,
+        //   (scale) => {
+        //     heatmapLayer.visible = scale > 60000;
+        //     clusterLayer.featureReduction = scale > 60000 ? clusterConfig : null;
+        //   }
+        // );
 
         // Wait for layer view to be ready and query features
         const layerView = await view.whenLayerView(heatmapLayer);
@@ -521,9 +521,21 @@
           debouncedUpdateStats(layerView);
         });
       });
+      
+      function areLayersVisible(layers) {
+        return layers.some(layer => layer.visible);
+        
+      }
 
       // Function to update statistics based on current view extent
       function updateStats(layerView) {
+        
+        const layers = [clusterLayer, heatmapLayer];
+        if (!areLayersVisible(layers)) {
+          renderStats({}, false);
+          return;
+        }
+        
         const query = layerView.createQuery();
         query.geometry = view.extent;
         layerView.queryFeatures(query).then(result => {
@@ -531,7 +543,8 @@
           statsQuery.outStatistics = createStatDefinitions();
           layerView.queryFeatures(statsQuery).then(response => {
             const stats = response.features[0].attributes;
-            renderStats(stats);
+            const hasData = result.features.length > 0;
+            renderStats(stats, hasData);
           });
         });
       }
@@ -572,11 +585,16 @@
       }
 
       // Function to render statistics in the side panel and create charts
-      function renderStats(stats) {
+      function renderStats(stats, hasData) {
         console.log("Stats object:", stats);
 
         const panel = document.getElementById("panel");
         panel.innerHTML = `<h2>Summary Statistics</h2>`;
+        
+        if (!hasData) {
+          panel.innerHTML += `<p>No data is being displayed.</p>`;
+          return;
+        }
 
         const fuels = ["Hydro", "Gas", "Other", "Oil", "Wind", "Nuclear", "Coal", "Solar", "Waste", "Biomass", "Geothermal"];
         const countries = ["Afghanistan", "Albania", "Algeria", "Angola", "Antarctica", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahrain", "Bangladesh", "Belarus", "Belgium", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei Darussalam", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Central African Republic", "Chile", "China", "Colombia", "Congo", "Costa Rica", "Cote DIvoire", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "French Guiana", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Mali", "Mauritania", "Mauritius", "Mexico", "Moldova", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "Norway", "Oman", "Pakistan", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saudi Arabia", "Senegal", "Serbia", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "South Africa", "South Korea", "Spain", "Sri Lanka", "Sudan", "Swaziland", "Sweden", "Switzerland", "Syrian Arab Republic", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States of America", "Uruguay", "Uzbekistan", "Venezuela", "Vietnam", "Western Sahara", "Yemen", "Zambia", "Zimbabwe"];
