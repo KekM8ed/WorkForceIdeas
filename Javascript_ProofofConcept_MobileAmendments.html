@@ -531,10 +531,10 @@
       function updateStats(layerView) {
         
         const layers = [clusterLayer, heatmapLayer];
-        if (!areLayersVisible(layers)) {
-          renderStats({}, false);
-          return;
-        }
+  if (!areLayersVisible(layers)) {
+    renderStats({}, false);
+    return;
+  }
         
         const query = layerView.createQuery();
         query.geometry = view.extent;
@@ -747,6 +747,9 @@
                     scaleLabel: {
                       display: true,
                       labelString: 'Fuel Type'
+                    },
+                    ticks: {
+                      autoSkip: false // Ensure all labels are displayed
                     }
                   }]
                 }
