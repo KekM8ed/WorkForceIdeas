@@ -36,11 +36,6 @@
 
     /* Styles for the filter container */
     #filterDiv {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%); /* Center on mobile */
-      z-index: 10;
       background-color: #2b2b2b;
       padding: 10px;
       box-shadow: 0 0 5px rgba(0,0,0,0.5);
@@ -48,50 +43,12 @@
       font-family: "Noto Sans", sans-serif;
       border-radius: 5px;
       display: flex;
-      flex-direction: column; /* Changed for mobile */
-      width: 60%; /* Reduce width for mobile */
-      max-height: 50%; /* Limit height on mobile */
-      overflow-y: auto; /* Allow scrolling */
-    }
-
-    /* Media query for portrait orientation on mobile devices */
-    @media (max-width: 600px) and (orientation: portrait) {
-      #filterDiv {
-        width: 60%;
-        top: 10px; /* Ensure it doesn't overlap with other UI elements */
-      }
-    }
-
-    /* Media query for landscape orientation on mobile devices */
-    @media (max-width: 800px) and (orientation: landscape) {
-      html, body {
-        flex-direction: row;
-      }
-
-      #viewDiv {
-        height: 100%;
-        width: 60%; /* Adjust width for landscape */
-        flex: none; /* Remove flex growth */
-      }
-
-      #panel {
-        height: 100%;
-        width: 40%; /* Adjust width for landscape */
-        padding: 10px; /* Adjust padding */
-        position: relative;
-      }
-
-      #filterDiv {
-        width: 45%;
-        top: 10px; /* Keep it higher to avoid overlap with the statistics panel */
-        left: 60px; /* Align to the left */
-        transform: none; /* Reset transform */
-      }
-
+      flex-direction: column;
+      width: 300px;
     }
 
     /* Media query for larger screens */
-    @media (min-width: 800px) {
+    @media (min-width: 600px) {
       html, body {
         flex-direction: row;
       }
@@ -107,14 +64,6 @@
         height: 100%;
         width: 40%; /* Adjust width for larger screens */
         padding: 20px;
-      }
-
-      #filterDiv {
-        flex-direction: row;
-        width: 420px;
-        left: 150px;
-        transform: none; /* Reset transform */
-        max-height: none; /* Remove height limit on larger screens */
       }
     }
 
@@ -190,9 +139,8 @@
       "esri/core/reactiveUtils",
       "esri/widgets/Legend",
       "esri/widgets/Expand",
-      "esri/widgets/LayerList",
-      "esri/core/promiseUtils"
-    ], (Map, MapView, FeatureLayer, HeatmapRenderer, reactiveUtils, Legend, Expand, LayerList, promiseUtils) => {
+      "esri/widgets/LayerList"
+    ], (Map, MapView, FeatureLayer, HeatmapRenderer, reactiveUtils, Legend, Expand, LayerList) => {
 
       // Variables for charts
       let fuelChart, countryChart, powerplantChart;
@@ -569,30 +517,16 @@
 
       // Function to update statistics based on current view extent
       function updateStats(layerView) {
-        if (!areAnyLayersVisible()) {
-          renderStats(null);
-          return;
-        }
-
         const query = layerView.createQuery();
         query.geometry = view.extent;
         layerView.queryFeatures(query).then(result => {
-          if (result.features.length === 0) {
-            renderStats(null);
-          } else {
-            const statsQuery = query.clone();
-            statsQuery.outStatistics = createStatDefinitions();
-            layerView.queryFeatures(statsQuery).then(response => {
-              const stats = response.features[0].attributes;
-              renderStats(stats);
-            });
-          }
+          const statsQuery = query.clone();
+          statsQuery.outStatistics = createStatDefinitions();
+          layerView.queryFeatures(statsQuery).then(response => {
+            const stats = response.features[0].attributes;
+            renderStats(stats);
+          });
         });
-      }
-
-      // Function to check if any layers are visible
-      function areAnyLayersVisible() {
-        return map.layers.some(layer => layer.visible);
       }
 
       // Function to create statistical definitions for queries
@@ -637,18 +571,13 @@
         const panel = document.getElementById("panel");
         panel.innerHTML = `<h2>Summary Statistics</h2>`;
 
-        if (!stats) {
-          panel.innerHTML += `<p>No data available for the current view.</p>`;
-          return;
-        }
-
         const fuels = ["Hydro", "Gas", "Other", "Oil", "Wind", "Nuclear", "Coal", "Solar", "Waste", "Biomass", "Geothermal"];
         const countries = ["Afghanistan", "Albania", "Algeria", "Angola", "Antarctica", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahrain", "Bangladesh", "Belarus", "Belgium", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei Darussalam", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Central African Republic", "Chile", "China", "Colombia", "Congo", "Costa Rica", "Cote DIvoire", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "French Guiana", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Mali", "Mauritania", "Mauritius", "Mexico", "Moldova", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "Norway", "Oman", "Pakistan", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saudi Arabia", "Senegal", "Serbia", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "South Africa", "South Korea", "Spain", "Sri Lanka", "Sudan", "Swaziland", "Sweden", "Switzerland", "Syrian Arab Republic", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States of America", "Uruguay", "Uzbekistan", "Venezuela", "Vietnam", "Western Sahara", "Yemen", "Zambia", "Zimbabwe"];
 
         const fuelStats = fuels.map(fuel => {
           const value = Math.round(stats[`Total_${fuel}MW`]);
           return { fuel, value };
-        }). sort((a, b) => b.value - a.value).slice(0, 15);
+        }).sort((a, b) => b.value - a.value).slice(0, 15);
 
         const countryStats = countries.map(country => {
           const value = Math.round(stats[`Total_${country.replace(/ /g, '_')}`]);
@@ -793,9 +722,6 @@
                     scaleLabel: {
                       display: true,
                       labelString: 'Fuel Type'
-                    },
-                    ticks: {
-                      autoSkip: false // Ensure all labels are displayed
                     }
                   }]
                 }
@@ -926,36 +852,10 @@
         view: view,
         content: legend,
         expandIconClass: "esri-icon-legend",
-        expanded: true,
-        expandTooltip: "Legend",
-        group: "top-right",
-        className: "esri-expand-left",
-        id: "legendExpand" // Added ID for easier reference
+        expanded: true
       });
 
       view.ui.add(legendExpand, "top-right");
-
-      // Function to update the legend position based on the screen size and orientation
-      function updateLegendPosition() {
-        const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-        const isMobile = window.matchMedia("(max-width: 800px)").matches;
-        const legendExpand = view.ui.find("legendExpand");
-
-        if (isLandscape && isMobile) {
-          view.ui.move(legendExpand, "top-left"); // Move to top-left in landscape mobile view
-          legendExpand.expandTooltip = "Legend (under Layer List)";
-        } else {
-          view.ui.move(legendExpand, "top-right"); // Default position
-          legendExpand.expandTooltip = "Legend";
-        }
-      }
-
-      // Initial call to set the correct position on load
-      updateLegendPosition();
-
-      // Update position on orientation change and resize
-      window.addEventListener("resize", updateLegendPosition);
-      window.addEventListener("orientationchange", updateLegendPosition);
 
       // Layer list widget
       const layerList = new LayerList({
@@ -967,9 +867,7 @@
         view: view,
         content: layerList,
         expandIconClass: "esri-icon-layer-list",
-        expanded: false,
-        expandTooltip: "Layer List",
-        group: "top-left"
+        expanded: false
       });
 
       view.ui.add(layerListExpand, "top-left");
@@ -999,7 +897,15 @@
           <div id="countryFilter" class="scrollable-list"></div>
         </details>
       `;
-      view.ui.add(filterDiv, "manual");
+
+      const filterExpand = new Expand({
+        view: view,
+        content: filterDiv,
+        expandIconClass: "esri-icon-filter",
+        expanded: false
+      });
+
+      view.ui.add(filterExpand, "top-left");
 
       // Populate filters with distinct values from the layer
       clusterLayer.when(() => {
@@ -1040,6 +946,8 @@
             geoDiv.appendChild(geoLabel);
             fuelFilter.appendChild(geoDiv);
           }
+
+          addFilterEventListeners();
         });
 
         const countryQuery = clusterLayer.createQuery();
@@ -1067,15 +975,18 @@
             div.appendChild(label);
             countryFilter.appendChild(div);
           });
+
+          addFilterEventListeners();
         });
       });
 
-      // Add event listeners for filter changes
-      document.getElementById("fuelFilter").addEventListener("change", updateFilter);
-      document.getElementById("countryFilter").addEventListener("change", updateFilter);
+      function addFilterEventListeners() {
+        document.getElementById("fuelFilter").addEventListener("change", updateFilter);
+        document.getElementById("countryFilter").addEventListener("change", updateFilter);
 
-      document.getElementById("fuel-all").addEventListener("change", (e) => toggleAll(e, "fuel"));
-      document.getElementById("country-all").addEventListener("change", (e) => toggleAll(e, "country"));
+        document.getElementById("fuel-all").addEventListener("change", (e) => toggleAll(e, "fuel"));
+        document.getElementById("country-all").addEventListener("change", (e) => toggleAll(e, "country"));
+      }
 
       // Function to update filters based on selected checkboxes
       function updateFilter() {
