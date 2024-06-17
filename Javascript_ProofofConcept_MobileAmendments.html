@@ -67,6 +67,13 @@
       }
     }
 
+    /* Media query for mobile landscape orientation */
+    @media (orientation: landscape) and (max-width: 599px) {
+      .esri-expand--left {
+        left: 0 !important;
+      }
+    }
+
     /* Styles for filter labels */
     #filterDiv label {
       margin-right: 10px;
@@ -97,7 +104,7 @@
 
     /* Styles for scrollable lists */
     .scrollable-list {
-      max-height: 200px;
+      max-height: 120px;
       overflow-y: auto;
       padding-right: 5px;
     }
@@ -855,7 +862,7 @@
         expanded: true
       });
 
-      view.ui.add(legendExpand, "top-right");
+      view.ui.add(legendExpand, "top-left");
 
       // Layer list widget
       const layerList = new LayerList({
