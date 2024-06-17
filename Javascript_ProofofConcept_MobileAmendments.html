@@ -1047,6 +1047,19 @@
         checkboxes.forEach(checkbox => checkbox.checked = event.target.checked);
         updateFilter();
       }
+
+      // Close expanded widgets when clicking outside of them
+      document.addEventListener("click", (event) => {
+        const isClickInside = filterExpand.domNode.contains(event.target) ||
+          legendExpand.domNode.contains(event.target) ||
+          layerListExpand.domNode.contains(event.target);
+
+        if (!isClickInside) {
+          filterExpand.collapse();
+          legendExpand.collapse();
+          layerListExpand.collapse();
+        }
+      });
     });
   </script>
 </body>
