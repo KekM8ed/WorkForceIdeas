@@ -238,7 +238,7 @@
           labelExpressionInfo: {
             expression: "Text($feature.cluster_count, '#,### plants')"
           },
-          where: `cluster_avg_capacity_mw > ${clusterLabelThreshold}`
+          /*where: `cluster_avg_capacity_mw > ${clusterLabelThreshold}`
         }, {
           symbol: {
             type: "text",
@@ -256,7 +256,7 @@
           labelPlacement: "center-center",
           labelExpressionInfo: {
             expression: "$feature.cluster_type_fuel1"
-          },
+          },*/
           where: `cluster_avg_capacity_mw > ${clusterLabelThreshold}`
         }, {
           symbol: {
@@ -303,7 +303,7 @@
           labelExpressionInfo: {
             expression: "Text($feature.cluster_count, '#,### plants')"
           },
-          where: `cluster_avg_capacity_mw <= ${clusterLabelThreshold}`
+          /*where: `cluster_avg_capacity_mw <= ${clusterLabelThreshold}`
         }, {
           symbol: {
             type: "text",
@@ -319,7 +319,7 @@
           labelPlacement: "above-right",
           labelExpressionInfo: {
             expression: "$feature.cluster_type_fuel1"
-          },
+          },*/
           where: `cluster_avg_capacity_mw <= ${clusterLabelThreshold}`
         }, {
           symbol: {
@@ -390,7 +390,7 @@
           labelPlacement: "center-center",
           labelExpressionInfo: { expression: "$feature.name" },
           where: `capacity_mw > ${clusterLabelThreshold}`
-        }, {
+        }, /*{
           symbol: {
             type: "text",
             haloColor,
@@ -403,7 +403,7 @@
           labelPlacement: "center-center",
           labelExpressionInfo: { expression: "$feature.fuel1" },
           where: `capacity_mw > ${clusterLabelThreshold}`
-        }, {
+        },*/ {
           symbol: {
             type: "text",
             haloColor,
@@ -440,7 +440,7 @@
           labelPlacement: "above-right",
           labelExpressionInfo: { expression: "$feature.name" },
           where: `capacity_mw <= ${clusterLabelThreshold}`
-        }, {
+        }, /*{
           symbol: {
             type: "text",
             haloColor,
@@ -451,7 +451,7 @@
           labelPlacement: "above-right",
           labelExpressionInfo: { expression: "$feature.fuel1" },
           where: `capacity_mw <= ${clusterLabelThreshold}`
-        }, {
+        },*/ {
           symbol: {
             type: "text",
             haloColor,
@@ -964,10 +964,27 @@
         view: view,
         content: legend,
         expandIconClass: "esri-icon-legend",
-        expanded: true
+        expanded: false
       });
 
       view.ui.add(legendExpand, "top-left");
+      
+      const sampleInstructions = document.createElement("div");
+        sampleInstructions.style.padding = "10px";
+        sampleInstructions.style.backgroundColor = "#2b2b2b";
+        sampleInstructions.style.width = "300px";
+        sampleInstructions.innerHTML = [
+          "Use the available filters and polygon selection to filter the data and return summary statistics. <b>Please note, only one polygon may be drawn at a time.</b><br><br>The data will be displayed as scaleable clusters and a scaleable heatmap. These layers can be turned off individually.<br><br>The clusters will be labelled with the number of plants that make up the cluster, or where the individual plant is shown it will be labelled with the plant name."
+        ].join(" ");
+        
+      const instructionsExpand = new Expand({
+          expandIcon: "question",
+          expandTooltip: "How to use this sample",
+          view: view,
+          content: sampleInstructions,
+          expanded: true
+        });
+        view.ui.add(instructionsExpand, "top-left");
 
       // Layer list widget
       const layerList = new LayerList({
@@ -1233,12 +1250,14 @@
       document.addEventListener("click", (event) => {
         const isClickInside = filterExpand.domNode.contains(event.target) ||
           legendExpand.domNode.contains(event.target) ||
-          layerListExpand.domNode.contains(event.target);
+          layerListExpand.domNode.contains(event.target) ||
+          instructionsExpand.domNode.contains(event.target);
 
         if (!isClickInside) {
           filterExpand.collapse();
           legendExpand.collapse();
           layerListExpand.collapse();
+          instructionsExpand.collapse();
         }
       });
     });
