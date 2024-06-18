@@ -534,7 +534,7 @@
       view.ui.add("clear-selection", "top-right");
       document.getElementById("clear-selection").addEventListener("click", () => {
         polygonGraphicsLayer.removeAll();
-        updateFilter(); // Update the filter when clearing selection
+        resetFilterAndStats(); // Update the filter and stats when clearing selection
       });
 
       // SketchViewModel configuration
@@ -551,10 +551,21 @@
           }
         }
       });
+      
+      // Function to reset the filter and reload data and statistics
+      function resetFilterAndStats() {
+        updateFilter();
+      }
+
 
       // click event for the select by polygon button
       selectButton.addEventListener("click", () => {
         view.closePopup();
+        // Clear any existing polygon before creating a new one
+        if (polygonGraphicsLayer.graphics.length > 0) {
+          polygonGraphicsLayer.removeAll();
+          resetFilterAndStats();
+        }
         sketchViewModel.create("polygon");
       });
 
@@ -642,61 +653,69 @@
       // Function to render statistics in the side panel and create charts
       function renderStats(stats, hasData) {
         console.log("Stats object:", stats);
-
+      
         const panel = document.getElementById("panel");
         panel.innerHTML = `<h2>Summary Statistics</h2>`;
-        
+      
         if (!hasData) {
           panel.innerHTML += `<p>No data is being displayed.</p>`;
           return;
         }
-
+      
+        // Check if all stats values are null
+        const allStatsNull = Object.values(stats).every(value => value === null);
+      
+        if (allStatsNull) {
+          panel.innerHTML += `<p>No data is being displayed.</p>`;
+          return;
+        }
+      
         const fuels = ["Hydro", "Gas", "Other", "Oil", "Wind", "Nuclear", "Coal", "Solar", "Waste", "Biomass", "Geothermal"];
         const countries = ["Afghanistan", "Albania", "Algeria", "Angola", "Antarctica", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahrain", "Bangladesh", "Belarus", "Belgium", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei Darussalam", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Central African Republic", "Chile", "China", "Colombia", "Congo", "Costa Rica", "Cote DIvoire", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "French Guiana", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Mali", "Mauritania", "Mauritius", "Mexico", "Moldova", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "Norway", "Oman", "Pakistan", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saudi Arabia", "Senegal", "Serbia", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "South Africa", "South Korea", "Spain", "Sri Lanka", "Sudan", "Swaziland", "Sweden", "Switzerland", "Syrian Arab Republic", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States of America", "Uruguay", "Uzbekistan", "Venezuela", "Vietnam", "Western Sahara", "Yemen", "Zambia", "Zimbabwe"];
-
+      
         const fuelStats = fuels.map(fuel => {
           const value = Math.round(stats[`Total_${fuel}MW`]);
           return { fuel, value };
         }).sort((a, b) => b.value - a.value).slice(0, 15);
-
+      
         const countryStats = countries.map(country => {
           const value = Math.round(stats[`Total_${country.replace(/ /g, '_')}`]);
           return { country, value };
         }).sort((a, b) => b.value - a.value).slice(0, 15);
-
+      
         const powerPlantStats = countries.map(country => {
           const value = Math.round(stats[`Total_${country.replace(/ /g, '_')}_Count`]);
           return { country, value };
         }).sort((a, b) => b.value - a.value).slice(0, 15);
-
+      
         console.log("Fuel Stats:", fuelStats);
         console.log("Country Stats:", countryStats);
         console.log("Power Plant Stats:", powerPlantStats);
-
+      
         const fuelStatsHtml = fuelStats.map(stat => `<p>${stat.fuel} Capacity: ${stat.value} MW</p>`).join("");
         const countryStatsHtml = countryStats.map(stat => `<p>${stat.country} Capacity: ${stat.value} MW</p>`).join("");
         const powerPlantStatsHtml = powerPlantStats.map(stat => `<p>${stat.country} Power Plants: ${stat.value}</p>`).join("");
-
+      
         panel.innerHTML += `<h3>Fuel Types by Energy Generated</h3>${fuelStatsHtml}`;
         panel.innerHTML += `<canvas id="fuelChart"></canvas>`;
         panel.innerHTML += `<h3>Top 15 Countries by Energy Generation</h3>${countryStatsHtml}`;
         panel.innerHTML += `<canvas id="countryChart"></canvas>`;
         panel.innerHTML += `<h3>Top 15 Countries by Number of Power Plants</h3>${powerPlantStatsHtml}`;
         panel.innerHTML += `<canvas id="powerplantChart"></canvas>`;
-
+      
         const fuelLabels = fuelStats.map(stat => stat.fuel);
         const fuelData = fuelStats.map(stat => stat.value);
-
+      
         const countryLabels = countryStats.map(stat => stat.country);
         const countryData = countryStats.map(stat => stat.value);
-
+      
         const powerPlantLabels = powerPlantStats.map(stat => stat.country);
         const powerPlantData = powerPlantStats.map(stat => stat.value);
-
+      
         // Map of country name replacements
         const countryNameMap = {
           "Democratic Republic of the Congo": "DR Congo",
-          "Bosnia and Herzegovina": "Bosnie and H",
+          "Bosnia and Herzegovina": "Bosnia and H",
           "Brunei Darussalam": "Brunei",
           "Central African Republic": "Central African R",
           "Cote DIvoire": "Cote D'Ivoire",
@@ -707,11 +726,11 @@
           "United States of America": "USA",
           // Add more mappings here if needed
         };
-
+      
         // Apply the country name replacements
         const modifiedCountryLabels = countryLabels.map(country => countryNameMap[country] || country);
         const modifiedPowerPlantLabels = powerPlantLabels.map(country => countryNameMap[country] || country);
-
+      
         const fuelColorMap = {
           "Hydro": '#a6cee3',
           "Gas": '#fb9a99',
@@ -725,48 +744,48 @@
           "Biomass": '#ff7f00',
           "Geothermal": '#1f78b4'
         };
-
+      
         const fuelColors = fuelLabels.map(fuel => fuelColorMap[fuel]);
-
+      
         console.log("Fuel Labels:", fuelLabels);
         console.log("Fuel Data:", fuelData);
         console.log("Fuel Colors:", fuelColors);
-
+      
         if (fuelChart) {
           fuelChart.destroy();
         }
-
+      
         if (countryChart) {
           countryChart.destroy();
         }
-
+      
         if (powerplantChart) {
           powerplantChart.destroy();
         }
-
+      
         // Helper function to initialize chart
         function initializeChart() {
           try {
             const fuelChartElement = document.getElementById('fuelChart');
             const countryChartElement = document.getElementById('countryChart');
             const powerplantChartElement = document.getElementById('powerplantChart');
-
+      
             if (!fuelChartElement || !countryChartElement || !powerplantChartElement) {
               console.error('Canvas elements not found');
               setTimeout(initializeChart, 100); // Retry after 100ms if elements are not found
               return;
             }
-
+      
             const fuelCtx = fuelChartElement.getContext('2d');
             const countryCtx = countryChartElement.getContext('2d');
             const powerplantCtx = powerplantChartElement.getContext('2d');
-
+      
             if (!fuelCtx || !countryCtx || !powerplantCtx) {
               console.error('Failed to get 2D context for charts');
               setTimeout(initializeChart, 100); // Retry after 100ms if context is not available
               return;
             }
-
+      
             fuelChart = new Chart(fuelCtx, {
               type: 'bar',
               data: {
@@ -819,7 +838,7 @@
                 }
               }
             });
-
+      
             countryChart = new Chart(countryCtx, {
               type: 'bar',
               data: {
@@ -872,7 +891,7 @@
                 }
               }
             });
-
+      
             powerplantChart = new Chart(powerplantCtx, {
               type: 'bar',
               data: {
@@ -929,10 +948,11 @@
             console.error('Error initializing charts:', error);
           }
         }
-
+      
         // Delay chart initialization to ensure canvas elements are rendered
         requestAnimationFrame(initializeChart);
       }
+
 
       // Add legend to the view
       const legend = new Legend({
@@ -1084,40 +1104,123 @@
       function updateFilter() {
         const selectedFuels = Array.from(document.querySelectorAll("#fuelFilter input:checked")).map(input => input.value);
         const selectedCountries = Array.from(document.querySelectorAll("#countryFilter input:checked")).map(input => input.value);
-
+      
         let fuelFilter = "";
         if (selectedFuels.length) {
           fuelFilter = `fuel1 IN ('${selectedFuels.join("','")}')`;
         }
-
+      
         let countryFilter = "";
         if (selectedCountries.length) {
           countryFilter = `country_long IN ('${selectedCountries.join("','")}')`;
         }
-
+      
         const graphicGeometry = polygonGraphicsLayer.graphics.length > 0 ? polygonGraphicsLayer.graphics.getItemAt(0).geometry : null;
-
-        let filter = [fuelFilter, countryFilter].filter(Boolean).join(" AND ");
-
-        clusterLayer.definitionExpression = filter;
-        heatmapLayer.definitionExpression = filter;
-
-        view.whenLayerView(clusterLayer).then((layerView) => {
-          const query = layerView.createQuery();
-          if (graphicGeometry) {
+      
+        let attributeFilter = [fuelFilter, countryFilter].filter(Boolean).join(" AND ");
+      
+        clusterLayer.definitionExpression = attributeFilter;
+        heatmapLayer.definitionExpression = attributeFilter;
+      
+        if (graphicGeometry) {
+          view.whenLayerView(clusterLayer).then((layerView) => {
+            const query = layerView.createQuery();
             query.geometry = graphicGeometry;
-          }
-          query.where = filter;
-          layerView.queryFeatures(query).then((result) => {
-            const statsQuery = query.clone();
-            statsQuery.outStatistics = createStatDefinitions();
-            layerView.queryFeatures(statsQuery).then((response) => {
-              const stats = response.features.length > 0 ? response.features[0].attributes : {};
-              renderStats(stats, result.features.length > 0);
+            query.spatialRelationship = "intersects";
+            query.where = attributeFilter;
+            
+            layerView.queryFeatures(query).then((result) => {
+              // Hide all features initially
+              layerView.filter = {
+                geometry: null,
+                where: "1=0"
+              };
+              if (result.features.length > 0) {
+                const objectIds = result.features.map(feature => feature.attributes.OBJECTID);
+                layerView.filter = {
+                  objectIds: objectIds
+                };
+              }
+              
+              const statsQuery = query.clone();
+              statsQuery.outStatistics = createStatDefinitions();
+              layerView.queryFeatures(statsQuery).then((response) => {
+                const stats = response.features.length > 0 ? response.features[0].attributes : {};
+                renderStats(stats, result.features.length > 0);
+              });
             });
           });
-        });
+      
+          view.whenLayerView(heatmapLayer).then((layerView) => {
+            const query = layerView.createQuery();
+            query.geometry = graphicGeometry;
+            query.spatialRelationship = "intersects";
+            query.where = attributeFilter;
+            
+            layerView.queryFeatures(query).then((result) => {
+              // Hide all features initially
+              layerView.filter = {
+                geometry: null,
+                where: "1=0"
+              };
+              if (result.features.length > 0) {
+                const objectIds = result.features.map(feature => feature.attributes.OBJECTID);
+                layerView.filter = {
+                  objectIds: objectIds
+                };
+              }
+              
+              const statsQuery = query.clone();
+              statsQuery.outStatistics = createStatDefinitions();
+              layerView.queryFeatures(statsQuery).then((response) => {
+                const stats = response.features.length > 0 ? response.features[0].attributes : {};
+                renderStats(stats, result.features.length > 0);
+              });
+            });
+          });
+        } else {
+          view.whenLayerView(clusterLayer).then((layerView) => {
+            const query = layerView.createQuery();
+            query.where = attributeFilter;
+            
+            layerView.queryFeatures(query).then((result) => {
+              // Show all features that match the attribute filter
+              layerView.filter = {
+                geometry: null,
+                where: attributeFilter
+              };
+              
+              const statsQuery = query.clone();
+              statsQuery.outStatistics = createStatDefinitions();
+              layerView.queryFeatures(statsQuery).then((response) => {
+                const stats = response.features.length > 0 ? response.features[0].attributes : {};
+                renderStats(stats, result.features.length > 0);
+              });
+            });
+          });
+      
+          view.whenLayerView(heatmapLayer).then((layerView) => {
+            const query = layerView.createQuery();
+            query.where = attributeFilter;
+            
+            layerView.queryFeatures(query).then((result) => {
+              // Show all features that match the attribute filter
+              layerView.filter = {
+                geometry: null,
+                where: attributeFilter
+              };
+              
+              const statsQuery = query.clone();
+              statsQuery.outStatistics = createStatDefinitions();
+              layerView.queryFeatures(statsQuery).then((response) => {
+                const stats = response.features.length > 0 ? response.features[0].attributes : {};
+                renderStats(stats, result.features.length > 0);
+              });
+            });
+          });
+        }
       }
+
 
       // Function to toggle all checkboxes in a filter group
       function toggleAll(event, type) {
