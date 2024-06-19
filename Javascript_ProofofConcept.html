@@ -962,6 +962,7 @@
       // Expand widget for the legend
       const legendExpand = new Expand({
         view: view,
+        expandTooltip: "Legend",
         content: legend,
         expandIconClass: "esri-icon-legend",
         expanded: false
@@ -979,7 +980,7 @@
         
       const instructionsExpand = new Expand({
           expandIcon: "question",
-          expandTooltip: "How to use this sample",
+          expandTooltip: "About",
           view: view,
           content: sampleInstructions,
           expanded: true
@@ -994,6 +995,7 @@
       // Expand widget for the layer list
       const layerListExpand = new Expand({
         view: view,
+        expandTooltip: "Layer List",
         content: layerList,
         expandIconClass: "esri-icon-layer-list",
         expanded: false
@@ -1029,6 +1031,7 @@
 
       const filterExpand = new Expand({
         view: view,
+        expandTooltip: "Filter",
         content: filterDiv,
         expandIconClass: "esri-icon-filter",
         expanded: false
@@ -1247,18 +1250,31 @@
         updateFilter();
       }
 
+      // Array to hold all expand widgets
+      const expandWidgets = [legendExpand, instructionsExpand, layerListExpand, filterExpand];
+      
+      // Add event listeners to collapse others when one is expanded
+      expandWidgets.forEach(widget => {
+        widget.watch("expanded", (newValue) => {
+          if (newValue) {
+            expandWidgets.forEach(otherWidget => {
+              if (otherWidget !== widget) {
+                otherWidget.collapse();
+              }
+            });
+          }
+        });
+      });
+      
       // Close expanded widgets when clicking outside of them
       document.addEventListener("click", (event) => {
         const isClickInside = filterExpand.domNode.contains(event.target) ||
           legendExpand.domNode.contains(event.target) ||
           layerListExpand.domNode.contains(event.target) ||
           instructionsExpand.domNode.contains(event.target);
-
+      
         if (!isClickInside) {
-          filterExpand.collapse();
-          legendExpand.collapse();
-          layerListExpand.collapse();
-          instructionsExpand.collapse();
+          expandWidgets.forEach(widget => widget.collapse());
         }
       });
     });
