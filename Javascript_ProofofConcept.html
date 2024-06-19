@@ -238,8 +238,8 @@
           labelExpressionInfo: {
             expression: "Text($feature.cluster_count, '#,### plants')"
           },
-          /*where: `cluster_avg_capacity_mw > ${clusterLabelThreshold}`
-        }, {
+          where: `cluster_avg_capacity_mw > ${clusterLabelThreshold}`
+        }, /*{
           symbol: {
             type: "text",
             haloColor,
@@ -256,9 +256,9 @@
           labelPlacement: "center-center",
           labelExpressionInfo: {
             expression: "$feature.cluster_type_fuel1"
-          },*/
+          },
           where: `cluster_avg_capacity_mw > ${clusterLabelThreshold}`
-        }, {
+        },*/ {
           symbol: {
             type: "text",
             haloColor,
@@ -270,7 +270,7 @@
               size: "12px"
             },
             xoffset: 0,
-            yoffset: "15px"
+            yoffset: 0
           },
           labelPlacement: "center-center",
           labelExpressionInfo: {
