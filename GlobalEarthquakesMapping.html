@@ -2,12 +2,18 @@
 <html lang="en">
 
 <head>
+  <!-- Meta tags for character set and viewport settings -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Title of the webpage -->
   <title>USGS Earthquakes in the Last Week</title>
+  <!-- Link to the ArcGIS stylesheet for Esri widgets -->
   <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
+  <!-- Link to Chart.js library for creating charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Internal stylesheet for custom styles -->
   <style>
+    /* Styles for html and body to take full height and width */
     html,
     body {
       padding: 0;
@@ -16,16 +22,19 @@
       width: 100%;
     }
 
+    /* Container to hold content and infographics in a flex layout */
     #container {
       display: flex;
       height: 100%;
     }
 
+    /* Main content area */
     #content {
       width: 60%;
       position: relative;
     }
 
+    /* Infographics area */
     #infographics {
       width: 40%;
       height: 100%;
@@ -36,12 +45,14 @@
       padding: 0px;
     }
 
+    /* Map view container */
     #viewDiv {
       height: 100%;
       width: 100%;
       overflow-y: auto;
     }
 
+    /* Legend container */
     #legendDiv {
       position: absolute;
       top: 20px;
@@ -53,28 +64,33 @@
       font-family: "Avenir Next W00", "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
 
+    /* Styles for legend headings */
     #legendDiv h3,
     #legendDiv h4 {
       margin: 5px 0;
     }
 
+    /* Styles for legend items */
     #legendDiv div {
       display: flex;
       align-items: center;
       margin: 3px 0;
     }
 
+    /* Styles for legend item text */
     #legendDiv span {
       display: inline-block;
       margin-right: 8px;
     }
 
+    /* Style for tectonic line in legend */
     .tectonic-line {
       width: 12px;
       height: 0;
       border-top: 2px solid red;
     }
 
+    /* Styles for slider containers */
     .sliderContainer {
       position: absolute;
       left: 50%;
@@ -87,14 +103,17 @@
       box-sizing: border-box;
     }
 
+    /* Specific styles for date slider container */
     #dateSliderContainer {
       bottom: 150px;
     }
 
+    /* Specific styles for magnitude slider container */
     #magnitudeSliderContainer {
       bottom: 60px;
     }
 
+    /* Custom styles for Esri widgets */
     .esri-widget {
       font-family: "Avenir Next W00", "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
@@ -107,16 +126,18 @@
       white-space: nowrap;
     }
 
-    /* Custom slider styles */
+    /* Custom slider thumb style */
     .esri-slider__thumb {
       background-color: #D9CC82 !important;
       border: 2px solid #655411 !important;
     }
 
+    /* Custom slider track style */
     .esri-slider__track {
       background-color: #A8A69D !important;
     }
 
+    /* Custom styles for Esri zoom and navigation toggle buttons */
     .esri-zoom .esri-widget--button,
     .esri-navigation-toggle .esri-widget--button {
       background-color: #FDF5C7 !important;
@@ -128,6 +149,7 @@
       background-color: #D9CC82 !important;
     }
 
+    /* Count box style */
     #countBox {
       position: absolute;
       top: 160px;
@@ -139,6 +161,7 @@
       font-family: "Avenir Next W00", "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
 
+    /* Slider title style */
     .sliderTitle {
       text-align: center;
       margin-bottom: 2px;
@@ -151,7 +174,7 @@
       background-color: #FDF5C7 !important;
     }
 
-    /* Toggle button styles */
+    /* Toggle button style */
     #toggleButton {
       position: absolute;
       top: 20px;
@@ -165,6 +188,7 @@
       z-index: 1000;
     }
 
+    /* Toggle sliders button style */
     #toggleSlidersButton {
       position: absolute;
       top: 15px;
@@ -178,12 +202,13 @@
       z-index: 1000;
     }
 
-    /* Infographics container */
+    /* Infographics container style */
     #chartContainer {
       width: 90%;
       margin: auto;
     }
 
+    /* Info list and magnitude list styles */
     #infoList,
     #magnitudeList {
       width: 90%;
@@ -206,6 +231,7 @@
       margin-bottom: 5px;
     }
 
+    /* About widget style */
     #aboutWidget {
       position: absolute;
       bottom: 60px;
@@ -220,6 +246,7 @@
       display: none;
     }
 
+    /* About button style */
     #aboutButton {
       position: absolute;
       bottom: 20px;
@@ -233,6 +260,7 @@
       z-index: 1000;
     }
 
+    /* Responsive styles for screens smaller than 767px */
     @media (max-width: 767px) {
       #container {
         flex-direction: column;
@@ -270,10 +298,10 @@
 
       #aboutButton {
         left: 10px;
-        /*right: 10px;*/
       }
     }
 
+    /* Responsive styles for landscape orientation on tablets */
     @media (max-width: 1024px) and (orientation: landscape) {
       #container {
         flex-direction: row;
@@ -288,46 +316,65 @@
       }
     }
   </style>
+  <!-- Link to the ArcGIS JavaScript API -->
   <script src="https://js.arcgis.com/4.25/"></script>
 </head>
 
 <body>
+  <!-- Main container -->
   <div id="container">
+    <!-- Content area -->
     <div id="content">
+      <!-- Map view div -->
       <div id="viewDiv"></div>
+      <!-- Legend div -->
       <div id="legendDiv"></div>
+      <!-- Toggle legend button -->
       <div id="toggleButton" onclick="toggleLegend()">Show Legend</div>
+      <!-- Toggle sliders button -->
       <div id="toggleSlidersButton" onclick="toggleSliders()">Hide Sliders</div>
+      <!-- Date slider container -->
       <div id="dateSliderContainer" class="sliderContainer">
         <div id="dateSliderTitle" class="sliderTitle">Filter by Date Range</div>
         <div id="dateSliderDiv"></div>
       </div>
+      <!-- Magnitude slider container -->
       <div id="magnitudeSliderContainer" class="sliderContainer">
         <div id="magnitudeSliderTitle" class="sliderTitle">Filter by Magnitude Range</div>
         <div id="magnitudeSliderDiv"></div>
       </div>
+      <!-- Count box -->
       <div id="countBox">Total Points: 0</div>
+      <!-- About widget -->
       <div id="aboutWidget" class="esri-widget">
         <h3>About This App</h3>
         <p>This app displays all USGS recorded earthquakes magnitude > 1 that have occurred in the last 7 days.</p>
         <p>Information is provided on the 10 most powerful earthquakes, and the countries that have experienced the most earthquakes in this time period.</p>
         <p>Please note that earthquakes occurring outside of country boundaries do not contribute to the counts per country.</p>
       </div>
+      <!-- About button -->
       <div id="aboutButton" onclick="toggleAboutWidget()">About</div>
     </div>
+    <!-- Infographics area -->
     <div id="infographics">
+      <!-- Magnitude list container -->
       <div id="magnitudeList"></div>
+      <!-- Info list container -->
       <div id="infoList"></div>
+      <!-- Chart container -->
       <div id="chartContainer">
         <canvas id="earthquakeChart"></canvas>
       </div>
     </div>
   </div>
+  <!-- JavaScript functionality -->
   <script>
+    // Initialize variables
     let earthquakeData = [];
     let earthquakeCountPerCountry = {};
     let earthquakeChart;
 
+    // Toggle legend visibility
     function toggleLegend() {
       var legendDiv = document.getElementById('legendDiv');
       var toggleButton = document.getElementById('toggleButton');
@@ -340,6 +387,7 @@
       }
     }
 
+    // Toggle sliders visibility
     function toggleSliders() {
       var dateSliderContainer = document.getElementById('dateSliderContainer');
       var magnitudeSliderContainer = document.getElementById('magnitudeSliderContainer');
@@ -355,6 +403,7 @@
       }
     }
 
+    // Minimize legend on mobile devices
     function minimizeLegendOnMobile() {
       if (window.innerWidth < 768) {
         document.getElementById('legendDiv').style.display = 'none';
@@ -362,9 +411,11 @@
       }
     }
 
+    // Execute minimizeLegendOnMobile on window load and resize
     window.onload = minimizeLegendOnMobile;
     window.onresize = minimizeLegendOnMobile;
 
+    // Hide about widget when clicking outside of it
     document.addEventListener('click', function(event) {
       var aboutWidget = document.getElementById('aboutWidget');
       var aboutButton = document.getElementById('aboutButton');
@@ -373,6 +424,7 @@
       }
     });
 
+    // Toggle about widget visibility
     function toggleAboutWidget() {
       var aboutWidget = document.getElementById('aboutWidget');
       if (aboutWidget.style.display === 'none' || aboutWidget.style.display === '') {
@@ -382,6 +434,7 @@
       }
     }
 
+    // Load ArcGIS modules and initialize the map and view
     require([
       "esri/Map",
       "esri/views/SceneView",
@@ -403,12 +456,15 @@
       "esri/widgets/Popup"
     ], function (Map, SceneView, Graphic, GraphicsLayer, FeatureLayer, SimpleMarkerSymbol, SimpleLineSymbol, SimpleRenderer, UniqueValueRenderer, esriRequest, geometryEngine, Point, projection, SpatialReference, Slider, Zoom, NavigationToggle, Popup) {
 
+      // Load projection module
       projection.load().then(function () {
+        // Create a new map
         var map = new Map({
           basemap: "hybrid",
           ground: null
         });
 
+        // Create a new scene view
         var view = new SceneView({
           container: "viewDiv",
           map: map,
@@ -436,6 +492,7 @@
           })
         });
 
+        // Add tectonic plates layer
         var tectonicPlatesLayer = new FeatureLayer({
           url: "https://services.arcgis.com/jIL9msH9OI208GCb/arcgis/rest/services/Tectonic_Plates_and_Boundaries/FeatureServer",
           renderer: new SimpleRenderer({
@@ -447,6 +504,7 @@
         });
         map.add(tectonicPlatesLayer);
 
+        // Add world countries layer
         var worldCountriesLayer = new FeatureLayer({
           url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer",
           outFields: ["COUNTRY"]
@@ -454,9 +512,11 @@
         map.add(worldCountriesLayer);
         worldCountriesLayer.visible = false;
 
+        // Add graphics layer for earthquakes
         var graphicsLayer = new GraphicsLayer();
         map.add(graphicsLayer);
 
+        // Define renderer for earthquake symbols based on magnitude
         var renderer = new UniqueValueRenderer({
           field: "mag",
           uniqueValueInfos: [
@@ -501,6 +561,7 @@
 
         graphicsLayer.renderer = renderer;
 
+        // Function to get the appropriate symbol based on magnitude
         function getSymbol(magnitude) {
           if (magnitude < 3) {
             return renderer.uniqueValueInfos[0].symbol;
@@ -511,6 +572,7 @@
           }
         }
 
+        // Fetch earthquake data from USGS API
         function fetchEarthquakeData(startDate, endDate) {
           esriRequest("https://earthquake.usgs.gov/fdsnws/event/1/query", {
             query: {
@@ -529,6 +591,7 @@
           });
         }
 
+        // Assign country to each earthquake based on its location
         function assignCountryToEarthquakes(startDate, endDate, minMagnitude, maxMagnitude) {
           var query = worldCountriesLayer.createQuery();
           query.returnGeometry = true;
@@ -568,6 +631,7 @@
           });
         }
 
+        // Update the displayed earthquake data based on filters
         function updateEarthquakeData(startDate, endDate, minMagnitude, maxMagnitude) {
           graphicsLayer.removeAll();
           earthquakeCountPerCountry = {};
@@ -633,6 +697,7 @@
           displayEarthquakeChart(earthquakeCountPerCountry);
         }
 
+        // Initialize legend content
         var legendDiv = document.getElementById('legendDiv');
         legendDiv.innerHTML = `
           <h3>Legend</h3>
@@ -644,6 +709,7 @@
           <div><span class="tectonic-line"></span> Tectonic Plates</div>
         `;
 
+        // Initialize date slider
         var dateSliderDiv = document.getElementById('dateSliderDiv');
         var dateSlider = new Slider({
           container: dateSliderDiv,
@@ -657,12 +723,14 @@
           }
         });
 
+        // Update data on date slider change
         dateSlider.on(["thumb-drag", "thumb-change"], function (event) {
           var newStartDate = new Date(dateSlider.values[0]);
           var newEndDate = new Date(dateSlider.values[1]);
           updateEarthquakeData(newStartDate, newEndDate, magnitudeSlider.values[0], magnitudeSlider.values[1]);
         });
 
+        // Initialize magnitude slider
         var magnitudeSliderDiv = document.getElementById('magnitudeSliderDiv');
         var magnitudeSlider = new Slider({
           container: magnitudeSliderDiv,
@@ -690,12 +758,14 @@
           }]
         });
 
+        // Update data on magnitude slider change
         magnitudeSlider.on(["thumb-drag", "thumb-change"], function (event) {
           var newStartDate = new Date(dateSlider.values[0]);
           var newEndDate = new Date(dateSlider.values[1]);
           updateEarthquakeData(newStartDate, newEndDate, magnitudeSlider.values[0], magnitudeSlider.values[1]);
         });
 
+        // Set initial date range and fetch earthquake data
         var endDate = new Date();
         var startDate = new Date();
         startDate.setDate(endDate.getDate() - 7);
@@ -722,8 +792,10 @@
           labelsVisible: false
         }];
 
+        // Remove default compass widget
         view.ui.remove("compass");
 
+        // Initialize Chart.js bar chart for earthquakes per country
         const ctx = document.getElementById('earthquakeChart').getContext('2d');
         earthquakeChart = new Chart(ctx, {
           type: 'bar',
@@ -753,6 +825,7 @@
         });
       });
 
+      // Display earthquake data in the chart and lists
       function displayEarthquakeChart(data) {
         const sortedData = Object.entries(data).sort((a, b) => b[1] - a[1]).slice(0, 10);
         const labels = sortedData.map(item => item[0]);
