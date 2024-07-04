@@ -258,6 +258,8 @@
     let earthquakeData = [];
     let earthquakeCountPerCountry = {};
     let earthquakeChart;
+    let dateSlider;
+    let magnitudeSlider;
 
     function toggleLegend() {
       var legendDiv = document.getElementById('legendDiv');
@@ -278,8 +280,63 @@
       }
     }
 
-    window.onload = minimizeLegendOnMobile;
-    window.onresize = minimizeLegendOnMobile;
+    window.onload = () => {
+      minimizeLegendOnMobile();
+      adjustSliderLabels();
+    };
+    window.onresize = () => {
+      minimizeLegendOnMobile();
+      adjustSliderLabels();
+    };
+
+    function adjustSliderLabels() {
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        dateSlider.tickConfigs = [{
+          mode: "position",
+          values: [dateSlider.min, dateSlider.min + (dateSlider.max - dateSlider.min) / 3, dateSlider.max],
+          labelsVisible: true,
+          labels: function (value) {
+            return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          }
+        }];
+        magnitudeSlider.tickConfigs = [{
+          mode: "position",
+          values: [1, 2.5, 5, 7.5, 10],
+          labelsVisible: true,
+          labels: function (value) {
+            return value.toFixed(1);
+          }
+        }];
+      } else {
+        dateSlider.tickConfigs = [{
+          mode: "position",
+          values: Array.from({ length: 8 }, (_, i) => dateSlider.min + i * (1000 * 60 * 60 * 24)),
+          labelsVisible: true,
+          labels: function (value) {
+            return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          }
+        }, {
+          mode: "position",
+          values: Array.from({ length: 8 * 4 }, (_, i) => dateSlider.min + (i * (1000 * 60 * 60 * 6))),
+          labelsVisible: false
+        }];
+        magnitudeSlider.tickConfigs = [{
+          mode: "position",
+          values: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10],
+          labelsVisible: true,
+          labels: function (value) {
+            return value.toFixed(1);
+          }
+        }, {
+          mode: "position",
+          values: Array.from({ length: 90 }, (_, i) => 1 + i * 0.1),
+          labelsVisible: false
+        }];
+      }
+      dateSlider.redraw();
+      magnitudeSlider.redraw();
+    }
 
     require([
       "esri/Map",
@@ -551,7 +608,7 @@
         `;
 
         var dateSliderDiv = document.getElementById('dateSliderDiv');
-        var dateSlider = new Slider({
+        dateSlider = new Slider({
           container: dateSliderDiv,
           min: new Date().setHours(0, 0, 0, 0),
           max: new Date().setHours(24, 0, 0, 0),
@@ -570,7 +627,7 @@
         });
 
         var magnitudeSliderDiv = document.getElementById('magnitudeSliderDiv');
-        var magnitudeSlider = new Slider({
+        magnitudeSlider = new Slider({
           container: magnitudeSliderDiv,
           min: 1,
           max: 10,
