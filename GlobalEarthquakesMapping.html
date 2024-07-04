@@ -267,8 +267,48 @@
       }
     }
 
-    window.onload = minimizeLegendOnMobile;
-    window.onresize = minimizeLegendOnMobile;
+    function isMobileDevice() {
+      return window.innerWidth < 768;
+    }
+
+    function adjustSliderForDevice() {
+      const isMobile = isMobileDevice();
+      const dateSliderContainer = document.getElementById('dateSliderContainer');
+      const magnitudeSliderContainer = document.getElementById('magnitudeSliderContainer');
+
+      if (isMobile) {
+        dateSliderContainer.style.padding = '5px';
+        dateSliderContainer.style.bottom = '90px';
+        magnitudeSliderContainer.style.padding = '5px';
+        magnitudeSliderContainer.style.bottom = '30px';
+      } else {
+        dateSliderContainer.style.padding = '20px';
+        dateSliderContainer.style.bottom = '150px';
+        magnitudeSliderContainer.style.padding = '20px';
+        magnitudeSliderContainer.style.bottom = '60px';
+      }
+
+      dateSlider.tickConfigs = [{
+        mode: "position",
+        values: isMobile ? Array.from({ length: 4 }, (_, i) => new Date().setDate(new Date().getDate() - i * 2)).reverse() : Array.from({ length: 8 }, (_, i) => new Date().setDate(new Date().getDate() - i)).reverse(),
+        labelsVisible: true,
+      }];
+
+      magnitudeSlider.tickConfigs = [{
+        mode: "position",
+        values: isMobile ? [1, 3, 5, 7, 9] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        labelsVisible: true,
+      }];
+    }
+
+    window.onload = () => {
+      minimizeLegendOnMobile();
+      adjustSliderForDevice();
+    };
+    window.onresize = () => {
+      minimizeLegendOnMobile();
+      adjustSliderForDevice();
+    };
 
     require([
       "esri/Map",
@@ -552,10 +592,8 @@
           },
           tickConfigs: [{
             mode: "position",
-            values: Array.from({
-              length: 8
-            }, (_, i) => new Date().setDate(new Date().getDate() - i)).reverse(),
-            labelsVisible: window.innerWidth >= 768,
+            values: Array.from({ length: 8 }, (_, i) => new Date().setDate(new Date().getDate() - i)).reverse(),
+            labelsVisible: true,
           }]
         });
 
@@ -579,7 +617,7 @@
           tickConfigs: [{
             mode: "position",
             values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            labelsVisible: window.innerWidth >= 768,
+            labelsVisible: true,
           }]
         });
 
@@ -600,18 +638,14 @@
         dateSlider.values = [startDate.getTime(), endDate.getTime()];
         dateSlider.tickConfigs = [{
           mode: "position",
-          values: Array.from({
-            length: 8
-          }, (_, i) => startDate.getTime() + i * (1000 * 60 * 60 * 24)).concat(tomorrow),
+          values: Array.from({ length: 8 }, (_, i) => startDate.getTime() + i * (1000 * 60 * 60 * 24)).concat(tomorrow),
           labelsVisible: true,
           labels: function (value) {
             return new Date(value).toLocaleDateString();
           }
         }, {
           mode: "position",
-          values: Array.from({
-            length: 8 * 4
-          }, (_, i) => startDate.getTime() + (i * (1000 * 60 * 60 * 6))),
+          values: Array.from({ length: 8 * 4 }, (_, i) => startDate.getTime() + (i * (1000 * 60 * 60 * 6))),
           labelsVisible: false
         }];
 
