@@ -263,6 +263,7 @@
       }
 
       #aboutWidget {
+        bottom: 80px;
         left: 10px;
         right: 10px;
       }
@@ -306,6 +307,13 @@
         <div id="magnitudeSliderDiv"></div>
       </div>
       <div id="countBox">Total Points: 0</div>
+      <div id="aboutWidget" class="esri-widget">
+        <h3>About This App</h3>
+        <p>This app displays all USGS recorded earthquakes magnitude > 1 that have occurred in the last 7 days.</p>
+        <p>Information is provided on the 10 most powerful earthquakes, and the countries that have experienced the most earthquakes in this time period.</p>
+        <p>Please note that earthquakes occurring outside of country boundaries do not contribute to the counts per country.</p>
+      </div>
+      <div id="aboutButton" onclick="toggleAboutWidget()">About</div>
     </div>
     <div id="infographics">
       <div id="magnitudeList"></div>
@@ -315,13 +323,6 @@
       </div>
     </div>
   </div>
-  <div id="aboutWidget" class="esri-widget">
-    <h3>About This App</h3>
-    <p>This app is designed to display all USGS recorded earthquakes > a magnitude of 1 that have occurred in the last 7 days.</p>
-    <p>Information is provided on the 10 most powerful earthquakes in the last 7 days and the countries that have experienced the most earthquakes in this time period.</p>
-    <p>Please note that earthquakes occurring outside of country land boundaries do not contribute to the earthquake counts per country.</p>
-  </div>
-  <div id="aboutButton" onclick="toggleAboutWidget()">About</div>
   <script>
     let earthquakeData = [];
     let earthquakeCountPerCountry = {};
