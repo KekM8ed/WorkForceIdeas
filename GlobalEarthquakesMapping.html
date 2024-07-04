@@ -130,7 +130,7 @@
     #countBox {
       position: absolute;
       top: 20px;
-      left: 60px;
+      left: 50px;
       background-color: #FDF5C7;
       padding: 10px;
       border-radius: 5px;
@@ -291,13 +291,23 @@
 
     function adjustSliderLabels() {
       const isMobile = window.innerWidth < 768;
+      const dateSliderValues = dateSlider.values;
+      const magnitudeSliderValues = magnitudeSlider.values;
+
       if (isMobile) {
         dateSlider.tickConfigs = [{
           mode: "position",
-          values: [dateSlider.min, dateSlider.min + (dateSlider.max - dateSlider.min) / 3, dateSlider.max],
+          values: [
+            dateSlider.min,
+            dateSlider.min + (dateSlider.max - dateSlider.min) / 2,
+            dateSlider.max
+          ],
           labelsVisible: true,
           labels: function (value) {
-            return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            return new Date(value).toLocaleDateString(undefined, {
+              month: 'short',
+              day: 'numeric'
+            });
           }
         }];
         magnitudeSlider.tickConfigs = [{
@@ -311,14 +321,21 @@
       } else {
         dateSlider.tickConfigs = [{
           mode: "position",
-          values: Array.from({ length: 8 }, (_, i) => dateSlider.min + i * (1000 * 60 * 60 * 24)),
+          values: Array.from({
+            length: 8
+          }, (_, i) => dateSlider.min + i * (1000 * 60 * 60 * 24)),
           labelsVisible: true,
           labels: function (value) {
-            return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            return new Date(value).toLocaleDateString(undefined, {
+              month: 'short',
+              day: 'numeric'
+            });
           }
         }, {
           mode: "position",
-          values: Array.from({ length: 8 * 4 }, (_, i) => dateSlider.min + (i * (1000 * 60 * 60 * 6))),
+          values: Array.from({
+            length: 8 * 4
+          }, (_, i) => dateSlider.min + (i * (1000 * 60 * 60 * 6))),
           labelsVisible: false
         }];
         magnitudeSlider.tickConfigs = [{
@@ -330,10 +347,15 @@
           }
         }, {
           mode: "position",
-          values: Array.from({ length: 90 }, (_, i) => 1 + i * 0.1),
+          values: Array.from({
+            length: 90
+          }, (_, i) => 1 + i * 0.1),
           labelsVisible: false
         }];
       }
+
+      dateSlider.values = dateSliderValues;
+      magnitudeSlider.values = magnitudeSliderValues;
       dateSlider.redraw();
       magnitudeSlider.redraw();
     }
@@ -415,8 +437,7 @@
 
         var renderer = new UniqueValueRenderer({
           field: "mag",
-          uniqueValueInfos: [
-            {
+          uniqueValueInfos: [{
               value: "<3",
               symbol: new SimpleMarkerSymbol({
                 color: "yellow",
@@ -561,20 +582,20 @@
                 content: [{
                   type: "fields",
                   fieldInfos: [{
-                    fieldName: "mag",
-                    label: "Magnitude"
-                  },
-                  {
-                    fieldName: "place",
-                    label: "Location"
-                  },
-                  {
-                    fieldName: "time",
-                    label: "Time",
-                    format: {
-                      dateFormat: "short-date-short-time"
+                      fieldName: "mag",
+                      label: "Magnitude"
+                    },
+                    {
+                      fieldName: "place",
+                      label: "Location"
+                    },
+                    {
+                      fieldName: "time",
+                      label: "Time",
+                      format: {
+                        dateFormat: "short-date-short-time"
+                      }
                     }
-                  }
                   ]
                 }]
               }
@@ -616,7 +637,10 @@
           rangeLabelsVisible: true,
           labelInputsEnabled: true,
           labelFormatFunction: function (value) {
-            return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            return new Date(value).toLocaleDateString(undefined, {
+              month: 'short',
+              day: 'numeric'
+            });
           }
         });
 
@@ -675,7 +699,10 @@
           }, (_, i) => startDate.getTime() + i * (1000 * 60 * 60 * 24)).concat(tomorrow),
           labelsVisible: true,
           labels: function (value) {
-            return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            return new Date(value).toLocaleDateString(undefined, {
+              month: 'short',
+              day: 'numeric'
+            });
           }
         }, {
           mode: "position",
