@@ -129,8 +129,8 @@
 
     #countBox {
       position: absolute;
-      top: 20px;
-      left: 50px;
+      bottom: 20px;
+      right: 20px;
       background-color: #FDF5C7;
       padding: 10px;
       border-radius: 5px;
@@ -220,11 +220,6 @@
       .esri-slider__tick-label {
         display: none;
       }
-
-      .sliderContainer {
-        padding: 10px;
-        width: 95%;
-      }
     }
   </style>
   <script src="https://js.arcgis.com/4.25/"></script>
@@ -258,8 +253,6 @@
     let earthquakeData = [];
     let earthquakeCountPerCountry = {};
     let earthquakeChart;
-    let dateSlider;
-    let magnitudeSlider;
 
     function toggleLegend() {
       var legendDiv = document.getElementById('legendDiv');
@@ -280,85 +273,8 @@
       }
     }
 
-    window.onload = () => {
-      minimizeLegendOnMobile();
-      adjustSliderLabels();
-    };
-    window.onresize = () => {
-      minimizeLegendOnMobile();
-      adjustSliderLabels();
-    };
-
-    function adjustSliderLabels() {
-      const isMobile = window.innerWidth < 768;
-      const dateSliderValues = dateSlider.values;
-      const magnitudeSliderValues = magnitudeSlider.values;
-
-      if (isMobile) {
-        dateSlider.tickConfigs = [{
-          mode: "position",
-          values: [
-            dateSlider.min,
-            dateSlider.min + (dateSlider.max - dateSlider.min) / 2,
-            dateSlider.max
-          ],
-          labelsVisible: true,
-          labels: function (value) {
-            return new Date(value).toLocaleDateString(undefined, {
-              month: 'short',
-              day: 'numeric'
-            });
-          }
-        }];
-        magnitudeSlider.tickConfigs = [{
-          mode: "position",
-          values: [1, 2.5, 5, 7.5, 10],
-          labelsVisible: true,
-          labels: function (value) {
-            return value.toFixed(1);
-          }
-        }];
-      } else {
-        dateSlider.tickConfigs = [{
-          mode: "position",
-          values: Array.from({
-            length: 8
-          }, (_, i) => dateSlider.min + i * (1000 * 60 * 60 * 24)),
-          labelsVisible: true,
-          labels: function (value) {
-            return new Date(value).toLocaleDateString(undefined, {
-              month: 'short',
-              day: 'numeric'
-            });
-          }
-        }, {
-          mode: "position",
-          values: Array.from({
-            length: 8 * 4
-          }, (_, i) => dateSlider.min + (i * (1000 * 60 * 60 * 6))),
-          labelsVisible: false
-        }];
-        magnitudeSlider.tickConfigs = [{
-          mode: "position",
-          values: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10],
-          labelsVisible: true,
-          labels: function (value) {
-            return value.toFixed(1);
-          }
-        }, {
-          mode: "position",
-          values: Array.from({
-            length: 90
-          }, (_, i) => 1 + i * 0.1),
-          labelsVisible: false
-        }];
-      }
-
-      dateSlider.values = dateSliderValues;
-      magnitudeSlider.values = magnitudeSliderValues;
-      dateSlider.redraw();
-      magnitudeSlider.redraw();
-    }
+    window.onload = minimizeLegendOnMobile;
+    window.onresize = minimizeLegendOnMobile;
 
     require([
       "esri/Map",
@@ -437,7 +353,8 @@
 
         var renderer = new UniqueValueRenderer({
           field: "mag",
-          uniqueValueInfos: [{
+          uniqueValueInfos: [
+            {
               value: "<3",
               symbol: new SimpleMarkerSymbol({
                 color: "yellow",
@@ -582,20 +499,20 @@
                 content: [{
                   type: "fields",
                   fieldInfos: [{
-                      fieldName: "mag",
-                      label: "Magnitude"
-                    },
-                    {
-                      fieldName: "place",
-                      label: "Location"
-                    },
-                    {
-                      fieldName: "time",
-                      label: "Time",
-                      format: {
-                        dateFormat: "short-date-short-time"
-                      }
+                    fieldName: "mag",
+                    label: "Magnitude"
+                  },
+                  {
+                    fieldName: "place",
+                    label: "Location"
+                  },
+                  {
+                    fieldName: "time",
+                    label: "Time",
+                    format: {
+                      dateFormat: "short-date-short-time"
                     }
+                  }
                   ]
                 }]
               }
@@ -629,7 +546,7 @@
         `;
 
         var dateSliderDiv = document.getElementById('dateSliderDiv');
-        dateSlider = new Slider({
+        var dateSlider = new Slider({
           container: dateSliderDiv,
           min: new Date().setHours(0, 0, 0, 0),
           max: new Date().setHours(24, 0, 0, 0),
@@ -637,10 +554,7 @@
           rangeLabelsVisible: true,
           labelInputsEnabled: true,
           labelFormatFunction: function (value) {
-            return new Date(value).toLocaleDateString(undefined, {
-              month: 'short',
-              day: 'numeric'
-            });
+            return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
           }
         });
 
@@ -651,7 +565,7 @@
         });
 
         var magnitudeSliderDiv = document.getElementById('magnitudeSliderDiv');
-        magnitudeSlider = new Slider({
+        var magnitudeSlider = new Slider({
           container: magnitudeSliderDiv,
           min: 1,
           max: 10,
@@ -699,10 +613,7 @@
           }, (_, i) => startDate.getTime() + i * (1000 * 60 * 60 * 24)).concat(tomorrow),
           labelsVisible: true,
           labels: function (value) {
-            return new Date(value).toLocaleDateString(undefined, {
-              month: 'short',
-              day: 'numeric'
-            });
+            return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
           }
         }, {
           mode: "position",
