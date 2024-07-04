@@ -83,7 +83,7 @@
       padding: 20px 37px 37px 37px;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-      width: 80%;
+      width: 70%;
       box-sizing: border-box;
     }
 
@@ -625,7 +625,7 @@
           },
           tickConfigs: [{
             mode: "position",
-            values: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10],
+            values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             labelsVisible: true,
             labels: function (value) {
               return value.toFixed(1);
@@ -633,8 +633,8 @@
           }, {
             mode: "position",
             values: Array.from({
-              length: 90
-            }, (_, i) => 1 + i * 0.1),
+              length: 45
+            }, (_, i) => 1 + i * 0.2),
             labelsVisible: false
           }]
         });
@@ -657,8 +657,8 @@
         dateSlider.tickConfigs = [{
           mode: "position",
           values: Array.from({
-            length: 8
-          }, (_, i) => startDate.getTime() + i * (1000 * 60 * 60 * 24)).concat(tomorrow),
+            length: 4
+          }, (_, i) => startDate.getTime() + i * (1000 * 60 * 60 * 48)).concat(tomorrow),
           labelsVisible: true,
           labels: function (value) {
             return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -666,8 +666,8 @@
         }, {
           mode: "position",
           values: Array.from({
-            length: 8 * 4
-          }, (_, i) => startDate.getTime() + (i * (1000 * 60 * 60 * 6))),
+            length: 8 * 2
+          }, (_, i) => startDate.getTime() + (i * (1000 * 60 * 60 * 12))),
           labelsVisible: false
         }];
 
