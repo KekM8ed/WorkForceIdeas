@@ -19,24 +19,21 @@
     #container {
       display: flex;
       height: 100%;
-      flex-direction: column;
     }
 
     #content {
-      flex: 1;
+      width: 60%;
       position: relative;
-      order: 1;
     }
 
     #infographics {
-      flex: 1;
-      height: 50%;
+      width: 40%;
+      height: 100%;
       background-color: #f0f0f0;
       display: flex;
       flex-direction: column;
       overflow-y: auto;
       padding: 0px;
-      order: 2;
     }
 
     #viewDiv {
@@ -82,7 +79,7 @@
       left: 50%;
       transform: translateX(-50%);
       background-color: #FDF5C7;
-      padding: 10px;
+      padding: 20px 37px 37px 37px;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       width: 80%;
@@ -90,11 +87,11 @@
     }
 
     #dateSliderContainer {
-      bottom: 120px;
+      bottom: 150px;
     }
 
     #magnitudeSliderContainer {
-      bottom: 20px;
+      bottom: 60px;
     }
 
     .esri-widget {
@@ -195,24 +192,33 @@
       margin-bottom: 5px;
     }
 
-    @media (min-width: 768px) {
+    @media (max-width: 767px) {
       #container {
-        flex-direction: row;
+        flex-direction: column;
       }
 
-      #content {
-        order: 1;
-        width: 60%;
-      }
-
+      #content,
       #infographics {
-        order: 2;
-        width: 40%;
-        height: 100%;
+        width: 100%;
+        height: 50%;
       }
 
-      .sliderContainer {
-        width: 50%;
+      #dateSliderContainer,
+      #magnitudeSliderContainer {
+        padding: 10px 20px;
+        width: 90%;
+      }
+
+      #dateSliderContainer {
+        bottom: 120px;
+      }
+
+      #magnitudeSliderContainer {
+        bottom: 30px;
+      }
+
+      .esri-slider__tick-label {
+        display: none;
       }
     }
   </style>
@@ -267,48 +273,8 @@
       }
     }
 
-    function isMobileDevice() {
-      return window.innerWidth < 768;
-    }
-
-    function adjustSliderForDevice() {
-      const isMobile = isMobileDevice();
-      const dateSliderContainer = document.getElementById('dateSliderContainer');
-      const magnitudeSliderContainer = document.getElementById('magnitudeSliderContainer');
-
-      if (isMobile) {
-        dateSliderContainer.style.padding = '5px';
-        dateSliderContainer.style.bottom = '90px';
-        magnitudeSliderContainer.style.padding = '5px';
-        magnitudeSliderContainer.style.bottom = '30px';
-      } else {
-        dateSliderContainer.style.padding = '20px';
-        dateSliderContainer.style.bottom = '150px';
-        magnitudeSliderContainer.style.padding = '20px';
-        magnitudeSliderContainer.style.bottom = '60px';
-      }
-
-      dateSlider.tickConfigs = [{
-        mode: "position",
-        values: isMobile ? Array.from({ length: 4 }, (_, i) => new Date().setDate(new Date().getDate() - i * 2)).reverse() : Array.from({ length: 8 }, (_, i) => new Date().setDate(new Date().getDate() - i)).reverse(),
-        labelsVisible: true,
-      }];
-
-      magnitudeSlider.tickConfigs = [{
-        mode: "position",
-        values: isMobile ? [1, 3, 5, 7, 9] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        labelsVisible: true,
-      }];
-    }
-
-    window.onload = () => {
-      minimizeLegendOnMobile();
-      adjustSliderForDevice();
-    };
-    window.onresize = () => {
-      minimizeLegendOnMobile();
-      adjustSliderForDevice();
-    };
+    window.onload = minimizeLegendOnMobile;
+    window.onresize = minimizeLegendOnMobile;
 
     require([
       "esri/Map",
@@ -588,13 +554,8 @@
           rangeLabelsVisible: true,
           labelInputsEnabled: true,
           labelFormatFunction: function (value) {
-            return new Date(value).toLocaleDateString();
-          },
-          tickConfigs: [{
-            mode: "position",
-            values: Array.from({ length: 8 }, (_, i) => new Date().setDate(new Date().getDate() - i)).reverse(),
-            labelsVisible: true,
-          }]
+            return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          }
         });
 
         dateSlider.on(["thumb-drag", "thumb-change"], function (event) {
@@ -616,8 +577,17 @@
           },
           tickConfigs: [{
             mode: "position",
-            values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            values: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10],
             labelsVisible: true,
+            labels: function (value) {
+              return value.toFixed(1);
+            }
+          }, {
+            mode: "position",
+            values: Array.from({
+              length: 90
+            }, (_, i) => 1 + i * 0.1),
+            labelsVisible: false
           }]
         });
 
@@ -638,14 +608,18 @@
         dateSlider.values = [startDate.getTime(), endDate.getTime()];
         dateSlider.tickConfigs = [{
           mode: "position",
-          values: Array.from({ length: 8 }, (_, i) => startDate.getTime() + i * (1000 * 60 * 60 * 24)).concat(tomorrow),
+          values: Array.from({
+            length: 8
+          }, (_, i) => startDate.getTime() + i * (1000 * 60 * 60 * 24)).concat(tomorrow),
           labelsVisible: true,
           labels: function (value) {
-            return new Date(value).toLocaleDateString();
+            return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
           }
         }, {
           mode: "position",
-          values: Array.from({ length: 8 * 4 }, (_, i) => startDate.getTime() + (i * (1000 * 60 * 60 * 6))),
+          values: Array.from({
+            length: 8 * 4
+          }, (_, i) => startDate.getTime() + (i * (1000 * 60 * 60 * 6))),
           labelsVisible: false
         }];
 
