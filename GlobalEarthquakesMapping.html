@@ -210,6 +210,10 @@
         width: 40%;
         height: 100%;
       }
+
+      .sliderContainer {
+        width: 50%;
+      }
     }
   </style>
   <script src="https://js.arcgis.com/4.25/"></script>
@@ -545,7 +549,14 @@
           labelInputsEnabled: true,
           labelFormatFunction: function (value) {
             return new Date(value).toLocaleDateString();
-          }
+          },
+          tickConfigs: [{
+            mode: "position",
+            values: Array.from({
+              length: 8
+            }, (_, i) => new Date().setDate(new Date().getDate() - i)).reverse(),
+            labelsVisible: window.innerWidth >= 768,
+          }]
         });
 
         dateSlider.on(["thumb-drag", "thumb-change"], function (event) {
@@ -567,17 +578,8 @@
           },
           tickConfigs: [{
             mode: "position",
-            values: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10],
-            labelsVisible: true,
-            labels: function (value) {
-              return value.toFixed(1);
-            }
-          }, {
-            mode: "position",
-            values: Array.from({
-              length: 90
-            }, (_, i) => 1 + i * 0.1),
-            labelsVisible: false
+            values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            labelsVisible: window.innerWidth >= 768,
           }]
         });
 
