@@ -19,21 +19,24 @@
     #container {
       display: flex;
       height: 100%;
+      flex-direction: column;
     }
 
     #content {
-      width: 60%;
+      flex: 1;
       position: relative;
+      order: 1;
     }
 
     #infographics {
-      width: 40%;
-      height: 100%;
+      flex: 1;
+      height: 50%;
       background-color: #f0f0f0;
       display: flex;
       flex-direction: column;
       overflow-y: auto;
       padding: 0px;
+      order: 2;
     }
 
     #viewDiv {
@@ -79,7 +82,7 @@
       left: 50%;
       transform: translateX(-50%);
       background-color: #FDF5C7;
-      padding: 20px 37px 37px 37px;
+      padding: 10px;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       width: 80%;
@@ -87,11 +90,11 @@
     }
 
     #dateSliderContainer {
-      bottom: 150px;
+      bottom: 120px;
     }
 
     #magnitudeSliderContainer {
-      bottom: 60px;
+      bottom: 20px;
     }
 
     .esri-widget {
@@ -170,7 +173,8 @@
       margin: auto;
     }
 
-    #infoList, #magnitudeList {
+    #infoList,
+    #magnitudeList {
       width: 90%;
       margin: 20px auto;
       background-color: white;
@@ -180,13 +184,32 @@
       font-family: "Avenir Next W00", "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
 
-    #infoList ul, #magnitudeList ul {
+    #infoList ul,
+    #magnitudeList ul {
       padding: 0;
       list-style: none;
     }
 
-    #infoList ul li, #magnitudeList ul li {
+    #infoList ul li,
+    #magnitudeList ul li {
       margin-bottom: 5px;
+    }
+
+    @media (min-width: 768px) {
+      #container {
+        flex-direction: row;
+      }
+
+      #content {
+        order: 1;
+        width: 60%;
+      }
+
+      #infographics {
+        order: 2;
+        width: 40%;
+        height: 100%;
+      }
     }
   </style>
   <script src="https://js.arcgis.com/4.25/"></script>
@@ -197,7 +220,7 @@
     <div id="content">
       <div id="viewDiv"></div>
       <div id="legendDiv"></div>
-      <div id="toggleButton" onclick="toggleLegend()">Hide Legend</div>
+      <div id="toggleButton" onclick="toggleLegend()">Show Legend</div>
       <div id="dateSliderContainer" class="sliderContainer">
         <div id="dateSliderTitle" class="sliderTitle">Filter by Date Range</div>
         <div id="dateSliderDiv"></div>
@@ -233,6 +256,16 @@
       }
     }
 
+    function minimizeLegendOnMobile() {
+      if (window.innerWidth < 768) {
+        document.getElementById('legendDiv').style.display = 'none';
+        document.getElementById('toggleButton').innerText = 'Show Legend';
+      }
+    }
+
+    window.onload = minimizeLegendOnMobile;
+    window.onresize = minimizeLegendOnMobile;
+
     require([
       "esri/Map",
       "esri/views/SceneView",
@@ -254,7 +287,7 @@
       "esri/widgets/Popup"
     ], function (Map, SceneView, Graphic, GraphicsLayer, FeatureLayer, SimpleMarkerSymbol, SimpleLineSymbol, SimpleRenderer, UniqueValueRenderer, esriRequest, geometryEngine, Point, projection, SpatialReference, Slider, Zoom, NavigationToggle, Popup) {
 
-      projection.load().then(function() {
+      projection.load().then(function () {
         var map = new Map({
           basemap: "hybrid",
           ground: null
@@ -541,7 +574,9 @@
             }
           }, {
             mode: "position",
-            values: Array.from({ length: 90 }, (_, i) => 1 + i * 0.1),
+            values: Array.from({
+              length: 90
+            }, (_, i) => 1 + i * 0.1),
             labelsVisible: false
           }]
         });
@@ -563,14 +598,18 @@
         dateSlider.values = [startDate.getTime(), endDate.getTime()];
         dateSlider.tickConfigs = [{
           mode: "position",
-          values: Array.from({ length: 8 }, (_, i) => startDate.getTime() + i * (1000 * 60 * 60 * 24)).concat(tomorrow),
+          values: Array.from({
+            length: 8
+          }, (_, i) => startDate.getTime() + i * (1000 * 60 * 60 * 24)).concat(tomorrow),
           labelsVisible: true,
           labels: function (value) {
             return new Date(value).toLocaleDateString();
           }
         }, {
           mode: "position",
-          values: Array.from({ length: 8 * 4 }, (_, i) => startDate.getTime() + (i * (1000 * 60 * 60 * 6))),
+          values: Array.from({
+            length: 8 * 4
+          }, (_, i) => startDate.getTime() + (i * (1000 * 60 * 60 * 6))),
           labelsVisible: false
         }];
 
