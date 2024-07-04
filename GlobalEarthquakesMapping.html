@@ -206,6 +206,33 @@
       margin-bottom: 5px;
     }
 
+    #aboutWidget {
+      position: absolute;
+      bottom: 60px;
+      left: 20px;
+      background-color: #FDF5C7;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      font-family: "Avenir Next W00", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      z-index: 1000;
+      max-width: 300px;
+      display: none;
+    }
+
+    #aboutButton {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background-color: #FDF5C7;
+      border: 1px solid #655411;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: "Avenir Next W00", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      z-index: 1000;
+    }
+
     @media (max-width: 767px) {
       #container {
         flex-direction: column;
@@ -233,6 +260,16 @@
 
       #magnitudeSliderContainer {
         bottom: 50px;
+      }
+
+      #aboutWidget {
+        left: 10px;
+        right: 10px;
+      }
+
+      #aboutButton {
+        left: 10px;
+        right: 10px;
       }
     }
 
@@ -278,6 +315,13 @@
       </div>
     </div>
   </div>
+  <div id="aboutWidget" class="esri-widget">
+    <h3>About This App</h3>
+    <p>This app is designed to display all USGS recorded earthquakes > a magnitude of 1 that have occurred in the last 7 days.</p>
+    <p>Information is provided on the 10 most powerful earthquakes in the last 7 days and the countries that have experienced the most earthquakes in this time period.</p>
+    <p>Please note that earthquakes occurring outside of country land boundaries do not contribute to the earthquake counts per country.</p>
+  </div>
+  <div id="aboutButton" onclick="toggleAboutWidget()">About</div>
   <script>
     let earthquakeData = [];
     let earthquakeCountPerCountry = {};
@@ -319,6 +363,23 @@
 
     window.onload = minimizeLegendOnMobile;
     window.onresize = minimizeLegendOnMobile;
+
+    document.addEventListener('click', function(event) {
+      var aboutWidget = document.getElementById('aboutWidget');
+      var aboutButton = document.getElementById('aboutButton');
+      if (!aboutWidget.contains(event.target) && !aboutButton.contains(event.target)) {
+        aboutWidget.style.display = 'none';
+      }
+    });
+
+    function toggleAboutWidget() {
+      var aboutWidget = document.getElementById('aboutWidget');
+      if (aboutWidget.style.display === 'none' || aboutWidget.style.display === '') {
+        aboutWidget.style.display = 'block';
+      } else {
+        aboutWidget.style.display = 'none';
+      }
+    }
 
     require([
       "esri/Map",
